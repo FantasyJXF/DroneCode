@@ -1,0 +1,6 @@
+uint8 distanceH
+uint8 distanceL
+uint8 ampH
+uint8 ampL
+uint8 tim
+uint8 sig
