@@ -195,7 +195,7 @@ run_sitl_ros: _sitl_deprecation
 # Other targets
 # --------------------------------------------------------------------
 
-.PHONY: uavcan_firmware check check_format format unittest tests qgc_firmware package_firmware clean submodulesclean distclean
+.PHONY: uavcan_firmware check check_format format unittest tests qgc_firmware package_firmware clean
 .NOTPARALLEL:
 
 # All targets with just dependencies but no recipe must either be marked as phony (or have the special @: as recipe).
@@ -273,14 +273,6 @@ package_firmware:
 clean:
 	@rm -rf build_*/
 	-@$(MAKE) -C NuttX/nuttx clean
-
-submodulesclean:
-	@git submodule sync --recursive
-	@git submodule deinit -f .
-	@git submodule update --init --recursive --force
-
-distclean: submodulesclean clean
-	@git clean -ff -x -d -e ".project" -e ".cproject" -e ".idea"
 
 # All other targets are handled by PX4_MAKE. Add a rule here to avoid printing an error.
 %:
