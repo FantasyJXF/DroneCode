@@ -39,6 +39,8 @@ public:
     NodeID getNodeID() const { return getScheduler().getDispatcher().getNodeID(); }
 
     /**
+	* 设置节点的NodeID
+	*
      * Sets the Node ID of this node.
      * Node ID can be assigned only once. This method returns true if the Node ID was successfully assigned, otherwise
      * it returns false.

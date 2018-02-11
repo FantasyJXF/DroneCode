@@ -250,8 +250,8 @@ void GenericSubscriber<DataSpec, DataStruct, TransferListenerType>::handleIncomi
     ReceivedDataStructureSpec rx_struct(&transfer);
 
     /*
-     * Decoding into the temporary storage
-     */
+    * Decoding into the temporary storage
+    */
     BitStream bitstream(transfer);
     ScalarCodec codec(bitstream);
 

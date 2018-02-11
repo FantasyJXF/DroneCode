@@ -578,7 +578,7 @@ int UavcanNode::start(uavcan::NodeID node_id, uint32_t bitrate)
 	/*
 	 * Node init
 	 */
-	_instance = new UavcanNode(can->driver, uavcan_stm32::SystemClock::instance());
+	_instance = new UavcanNode(can->driver, uavcan_stm32::SystemClock::instance()); // 新建CAN节点实例 
 
 	if (_instance == nullptr) {
 		warnx("Out of memory");
@@ -590,6 +590,7 @@ int UavcanNode::start(uavcan::NodeID node_id, uint32_t bitrate)
 		return -1;
 	}
 
+	// 初始化CAN节点
 	const int node_init_res = _instance->init(node_id);
 
 	if (node_init_res < 0) {
@@ -601,6 +602,7 @@ int UavcanNode::start(uavcan::NodeID node_id, uint32_t bitrate)
 
 	/*
 	 * Start the task. Normally it should never exit.
+	 * 开始任务
 	 */
 	static auto run_trampoline = [](int, char *[]) {return UavcanNode::_instance->run();};
 	_instance->_task = px4_task_spawn_cmd("uavcan", SCHED_DEFAULT, SCHED_PRIORITY_ACTUATOR_OUTPUTS, StackSize,
@@ -656,6 +658,7 @@ int UavcanNode::init(uavcan::NodeID node_id)
 	fill_node_info();
 
 	// Actuators
+	// 初始化CAN电调
 	ret = _esc_controller.init();
 
 	if (ret < 0) {
@@ -668,15 +671,17 @@ int UavcanNode::init(uavcan::NodeID node_id)
 		_esc_controller.enable_idle_throttle_when_armed(idle_throttle_when_armed > 0);
 	}
 
+	// 初始化CAN的hardpoint控制器
 	ret = _hardpoint_controller.init();
 
 	if (ret < 0) {
 		return ret;
 	}
 
+/////// 传感器连接 ////////////
 	// Sensor bridges
-	IUavcanSensorBridge::make_all(_node, _sensor_bridges);
-	auto br = _sensor_bridges.getHead();
+	IUavcanSensorBridge::make_all(_node, _sensor_bridges); // 这一个 "make all" 很重要
+	auto br = _sensor_bridges.getHead(); // 获取链表中的第一个传感器
 
 	while (br != nullptr) {
 		ret = br->init();
@@ -687,12 +692,12 @@ int UavcanNode::init(uavcan::NodeID node_id)
 		}
 
 		warnx("sensor bridge '%s' init ok", br->get_name());
-		br = br->getSibling();
+		br = br->getSibling(); // 下一个传感器
 	}
 
 
 	/*  Start the Node   */
-
+	//  打开节点
 	return _node.start();
 }
 
@@ -805,10 +810,12 @@ int UavcanNode::run()
 	 * time bases are the same
 	 */
 	uavcan_stm32::clock::adjustUtc(uavcan::UtcDuration::fromUSec(hrt_absolute_time()));
+	// 这里设置了回调函数，处理时间同步
 	_master_timer.setCallback(TimerCallback(this, &UavcanNode::handle_time_sync));
+	// 开始周期性监测
 	_master_timer.startPeriodic(uavcan::MonotonicDuration::fromMSec(1000));
 
-	_node_status_monitor.start();
+	_node_status_monitor.start(); // 开始节点状态监测
 
 	const int busevent_fd = ::open(uavcan_stm32::BusEvent::DevName, 0);
 
@@ -877,7 +884,7 @@ int UavcanNode::run()
 
 		(void)pthread_mutex_lock(&_node_mutex);
 
-		node_spin_once();  // Non-blocking
+		node_spin_once();  // Non-blocking 非阻塞
 
 		bool new_output = false;
 
@@ -1333,14 +1340,17 @@ int uavcan_main(int argc, char *argv[])
 		}
 
 		// CAN bitrate
-		int32_t bitrate = 1000000;
+		int32_t bitrate = 1000000; // 1Mbps
 		(void)param_get(param_find("UAVCAN_BITRATE"), &bitrate);
 
 		// Start
 		warnx("Node ID %u, bitrate %u", node_id, bitrate);
+
+		// 天才第一步
 		return UavcanNode::start(node_id, bitrate);
 	}
 
+	// 天才第二步
 	/* commands below require the app to be started */
 	UavcanNode *const inst = UavcanNode::instance();
 
