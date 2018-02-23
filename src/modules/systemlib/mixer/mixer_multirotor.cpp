@@ -232,7 +232,15 @@ MultirotorMixer::mix(float *outputs, unsigned space, uint16_t *status_reg)
 	3) mix in yaw and scale if it leads to limit violation.
 	4) scale all outputs to range [idle_speed,1]
 	*/
-
+	
+	/**
+	 * 混控策略的总结:
+	 * 1) 控制横滚、俯仰、推力，不包含偏航
+	 * 2) 如果有的输出违反了[0,1]的范围限制，那么改变所有的输出来最小化这个违反量
+	 * 3) 如果可以限制违反，对偏航通道进行混控并缩放
+	 * 4) 缩放所有的输出到[idle_speed,1]范围内
+	 */
+	
 	float		roll    = constrain(get_control(0, 0) * _roll_scale, -1.0f, 1.0f);
 	float		pitch   = constrain(get_control(0, 1) * _pitch_scale, -1.0f, 1.0f);
 	float		yaw     = constrain(get_control(0, 2) * _yaw_scale, -1.0f, 1.0f);

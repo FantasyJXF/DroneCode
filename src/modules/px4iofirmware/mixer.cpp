@@ -153,6 +153,7 @@ mixer_tick(void)
 
 	/*
 	 * Decide whether the servos should be armed right now.
+	 * 决定是否立刻解锁舵机
 	 *
 	 * We must be armed, and we must have a PWM source; either raw from
 	 * FMU or from the mixer.
@@ -165,7 +166,7 @@ mixer_tick(void)
 				     ((r_setup_arming & PX4IO_P_SETUP_ARMING_FMU_ARMED)
 				      /* and there is valid input via or mixer */         && (r_status_flags & PX4IO_P_STATUS_FLAGS_MIXER_OK))
 				     /* or direct PWM is set */               || (r_status_flags & PX4IO_P_STATUS_FLAGS_RAW_PWM)
-				     /* or failsafe was set manually */	 || ((r_setup_arming & PX4IO_P_SETUP_ARMING_FAILSAFE_CUSTOM)
+				     /* 手动设置了失控保护 or failsafe was set manually */	 || ((r_setup_arming & PX4IO_P_SETUP_ARMING_FAILSAFE_CUSTOM)
 						     && !(r_status_flags & PX4IO_P_STATUS_FLAGS_FMU_OK))
 			     )
 		     );
@@ -212,13 +213,16 @@ mixer_tick(void)
 		r_status_flags &= ~(PX4IO_P_STATUS_FLAGS_FAILSAFE);
 	}
 
-	/*
+	/**
 	 * Run the mixers.
+	 *
+	 * 运行混控器
+	 *
 	 */
 	if (source == MIX_FAILSAFE) {
 
 		/* copy failsafe values to the servo outputs */
-		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) {
+		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) { // PX4IO的8个通道
 			r_page_servos[i] = r_page_servo_failsafe[i];
 
 			/* safe actuators for FMU feedback */
@@ -234,6 +238,7 @@ mixer_tick(void)
 
 		if (REG_TO_FLOAT(r_setup_slew_max) > FLT_EPSILON) {
 			// maximum value the ouputs of the multirotor mixer are allowed to change in this cycle
+			// 在此循环中允许多旋翼混控输出的最大值改变
 			// factor 2 is needed because actuator ouputs are in the range [-1,1]
 			float delta_out_max = 2.0f * 1000.0f * dt / (r_page_servo_control_max[0] - r_page_servo_control_min[0]) / REG_TO_FLOAT(
 						      r_setup_slew_max);
@@ -244,6 +249,7 @@ mixer_tick(void)
 
 		/* poor mans mutex */
 		in_mixer = true;
+		// 计算输出数组大小
 		mixed = mixer_group.mix(&outputs[0], PX4IO_SERVO_COUNT, &r_mixer_limits);
 		in_mixer = false;
 
@@ -252,14 +258,16 @@ mixer_tick(void)
 			       r_page_servo_control_min, r_page_servo_control_max, outputs, r_page_servos, &pwm_limit);
 
 		/* clamp unused outputs to zero */
+		// 将未使用的输出通道赋0
 		for (unsigned i = mixed; i < PX4IO_SERVO_COUNT; i++) {
 			r_page_servos[i] = 0;
 			outputs[i] = 0.0f;
 		}
 
 		/* store normalized outputs */
+		// 保存归一化的输出
 		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) {
-			r_page_actuators[i] = FLOAT_TO_REG(outputs[i]);
+			r_page_actuators[i] = FLOAT_TO_REG(outputs[i]); // 最终的输出值  传到FMU
 		}
 	}
 

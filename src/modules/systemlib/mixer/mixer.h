@@ -147,11 +147,12 @@ public:
 
 	/**
 	 * Fetch a control value.
+	 * 获取控制值
 	 *
 	 * @param handle		Token passed when the callback is registered.
 	 * @param control_group		The group to fetch the control from.
 	 * @param control_index		The group-relative index to fetch the control from.
-	 * @param control		The returned control
+	 * @param control		The returned control 返回的控制值
 	 * @return			Zero if the value was fetched, nonzero otherwise.
 	 */
 	typedef int	(* ControlCallback)(uintptr_t handle,
@@ -169,10 +170,11 @@ public:
 
 	/**
 	 * Perform the mixing function.
+	 * 执行混控函数
 	 *
-	 * @param outputs		Array into which mixed output(s) should be placed.
-	 * @param space			The number of available entries in the output array;
-	 * @return			The number of entries in the output array that were populated.
+	 * @param outputs		Array into which mixed output(s) should be placed.    输出数组
+	 * @param space		The number of available entries in the output array;  输出数组中可用条目的数目
+	 * @return			The number of entries in the output array that were populated.  输出数组中已填充的数组
 	 */
 	virtual unsigned		mix(float *outputs, unsigned space, uint16_t *status_reg) = 0;
 
@@ -195,6 +197,7 @@ public:
 
 protected:
 	/** client-supplied callback used when fetching control values */
+	/* 在获取控制值时使用客户端提供的回调函数 */
 	ControlCallback			_control_cb;
 	uintptr_t			_cb_handle;
 
@@ -252,6 +255,9 @@ private:
 /**
  * Group of mixers, built up from single mixers and processed
  * in order when mixing.
+ * 
+ * 混控组，以单个混控为基础建立，
+ * 在混控时按顺序处理
  */
 class __EXPORT MixerGroup : public Mixer
 {

@@ -287,18 +287,18 @@ SimpleMixer::mix(float *outputs, unsigned space, uint16_t *status_reg)
 		return 0;
 	}
 
-	for (unsigned i = 0; i < _pinfo->control_count; i++) {
+	for (unsigned i = 0; i < _pinfo->control_count; i++) { // 混控器输入个数
 		float input;
 
 		_control_cb(_cb_handle,
 			    _pinfo->controls[i].control_group,
 			    _pinfo->controls[i].control_index,
-			    input);
+			    input); // 获得input的值
 
-		sum += scale(_pinfo->controls[i].scaler, input);
+		sum += scale(_pinfo->controls[i].scaler, input); // 将各个源的input进行缩放
 	}
 
-	*outputs = scale(_pinfo->output_scaler, sum);
+	*outputs = scale(_pinfo->output_scaler, sum); // 对最终的混控值进行缩放
 	return 1;
 }
 
