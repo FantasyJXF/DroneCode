@@ -193,6 +193,7 @@ controls_tick()
 
 	/*
 	 * Gather R/C control inputs from supported sources.
+	 * 从支持的源中收获R/C控制输入
 	 *
 	 * Note that if you're silly enough to connect more than
 	 * one control input source, they're going to fight each
@@ -285,6 +286,8 @@ controls_tick()
 	 * XXX each S.bus frame will cause a PPM decoder interrupt
 	 * storm (lots of edges).  It might be sensible to actually
 	 * disable the PPM decoder completely if we have S.bus signal.
+	 * 每个S.bus帧将导致PPM解码器中断风暴（大量边缘）。 
+	 * 如果我们有S.bus信号，实际上完全禁用PPM解码器可能是明智的。
 	 */
 	perf_begin(c_gather_ppm);
 	bool ppm_updated = ppm_input(r_raw_rc_values, &r_raw_rc_count, &r_page_raw_rc_input[PX4IO_P_RAW_RC_DATA]);
@@ -314,6 +317,7 @@ controls_tick()
 
 	/*
 	 * If we received a new frame from any of the RC sources, process it.
+	 * 如果从任意的RC源接收到一个新的帧，则处理它
 	 */
 	if (dsm_updated || sbus_updated || ppm_updated || st24_updated || sumd_updated) {
 
@@ -352,6 +356,7 @@ controls_tick()
 
 				/*
 				 * 2) Scale around the mid point differently for lower and upper range.
+				 *    对于较低和较高的范围，在中点附近进行缩放。
 				 *
 				 * This is necessary as they don't share the same endpoints and slope.
 				 *
@@ -444,6 +449,7 @@ controls_tick()
 	/*
 	 * If we haven't seen any new control data in 200ms, assume we
 	 * have lost input.
+	 * 如果200ms没有接收到新的控制数据，则认为丢失了输入
 	 */
 	if (hrt_elapsed_time(&system_state.rc_channels_timestamp_received) > 200000) {
 		rc_input_lost = true;
@@ -458,6 +464,7 @@ controls_tick()
 
 	/*
 	 * Handle losing RC input
+	 * 处理RC输入丢失情况
 	 */
 
 	/* if we are in failsafe, clear the override flag */
@@ -487,8 +494,10 @@ controls_tick()
 
 	/*
 	 * Check for manual override.
+	 * 检查手动覆盖
 	 *
 	 * Firstly, manual override must be enabled, RC input available and a mixer loaded.
+	 * 首先，必须使能手动覆盖，允许RC输入并且加载了混控器
 	 */
 	if ((r_setup_arming & PX4IO_P_SETUP_ARMING_MANUAL_OVERRIDE_OK) &&
 	    (r_status_flags & PX4IO_P_STATUS_FLAGS_RC_OK) &&

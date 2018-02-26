@@ -39,13 +39,16 @@
  * @file protocol.h
  *
  * PX4IO interface protocol.
+ * PX4IO接口协议
  *
  * Communication is performed via writes to and reads from 16-bit virtual
  * registers organised into pages of 255 registers each.
+ * 通过写入和读取16位虚拟寄存器进行通信，每个虚拟寄存器组织成255个寄存器页。
  *
  * The first two bytes of each write select a page and offset address
  * respectively. Subsequent reads and writes increment the offset within
  * the page.
+ * 前两个字节选择page和offset地址
  *
  * Some pages are read- or write-only.
  *
@@ -56,7 +59,7 @@
  * registers return undefined values.
  *
  * As convention, values that would be floating point in other parts of
- * the PX4 system are expressed as signed integer values scaled by 10000,
+ * the PX4 system are expressed as signed integer values scaled by 10000, 值都乘以10000
  * e.g. control values range from -10000..10000.  Use the REG_TO_SIGNED and
  * SIGNED_TO_REG macros to convert between register representation and
  * the signed version, and REG_TO_FLOAT/FLOAT_TO_REG to convert to float.
@@ -138,12 +141,15 @@
 #define PX4IO_P_STATUS_MIXER_YAW_LIMIT 			(1 << 2) /**< yaw control is limited because it causes output clipping */
 
 /* array of post-mix actuator outputs, -10000..10000 */
+// 混控后的执行器输出数组
 #define PX4IO_PAGE_ACTUATORS		2		/* 0..CONFIG_ACTUATOR_COUNT-1 */
 
 /* array of PWM servo output values, microseconds */
+// 电机的输出值PWM数组
 #define PX4IO_PAGE_SERVOS		3		/* 0..CONFIG_ACTUATOR_COUNT-1 */
 
 /* array of raw RC input values, microseconds */
+// 遥控器原始输入值数组
 #define PX4IO_PAGE_RAW_RC_INPUT		4
 #define PX4IO_P_RAW_RC_COUNT			0	/* number of valid channels */
 #define PX4IO_P_RAW_RC_FLAGS			1	/* RC detail status flags */
@@ -160,6 +166,7 @@
 #define PX4IO_P_RAW_RC_BASE			6	/* CONFIG_RC_INPUT_COUNT channels from here */
 
 /* array of scaled RC input values, -10000..10000 */
+// 缩放后的遥控器输入值数组
 #define PX4IO_PAGE_RC_INPUT		5
 #define PX4IO_P_RC_VALID			0	/* bitmask of valid controls */
 #define PX4IO_P_RC_BASE				1	/* CONFIG_RC_INPUT_COUNT controls from here */
@@ -224,12 +231,12 @@ enum {							/* DSM bind states */
 
 #define PX4IO_P_SETUP_CRC			11	/* get CRC of IO firmware */
 /* storage space of 12 occupied by CRC */
-#define PX4IO_P_SETUP_FORCE_SAFETY_OFF		12	/* force safety switch into
-                                                           'armed' (PWM enabled) state - this is a non-data write and
-                                                           hence index 12 can safely be used. */
+// CRC占用12个存储空间
+#define PX4IO_P_SETUP_FORCE_SAFETY_OFF		12	/* force safety switch into 'armed' (PWM enabled) state  强制安全开关切换到‘armed’状态
+													   - this is a non-data write and hence index 12 can safely be used. */
 #define PX4IO_P_SETUP_RC_THR_FAILSAFE_US	13	/**< the throttle failsafe pulse length in microseconds */
 
-#define PX4IO_P_SETUP_FORCE_SAFETY_ON		14	/* force safety switch into 'disarmed' (PWM disabled state) */
+#define PX4IO_P_SETUP_FORCE_SAFETY_ON		14	/* force safety switch into 'disarmed' (PWM disabled state) 强制安全开关切换到‘disarmed’状态*/
 #define PX4IO_FORCE_SAFETY_MAGIC		22027	/* required argument for force safety (random) */
 
 #define PX4IO_P_SETUP_PWM_REVERSE		15	/**< Bitmask to reverse PWM channels 1-8 */
@@ -322,6 +329,7 @@ struct px4io_mixdata {
 
 /**
  * Serial protocol encapsulation.
+ * 串行协议封装。
  */
 
 #define PKT_MAX_REGS	32 // by agreement w/FMU
@@ -336,10 +344,10 @@ struct IOPacket {
 };
 #pragma pack(pop)
 
-#define PKT_CODE_READ		0x00	/* FMU->IO read transaction */
-#define PKT_CODE_WRITE		0x40	/* FMU->IO write transaction */
-#define PKT_CODE_SUCCESS	0x00	/* IO->FMU success reply */
-#define PKT_CODE_CORRUPT	0x40	/* IO->FMU bad packet reply */
+#define PKT_CODE_READ		0x00	/* FMU->IO read transaction         FMU读取IO数据 */
+#define PKT_CODE_WRITE		0x40	/* FMU->IO write transaction   FMU向IO写数据*/
+#define PKT_CODE_SUCCESS	0x00	/* IO->FMU success reply            IO向FMU反馈成功标志*/
+#define PKT_CODE_CORRUPT	0x40	/* IO->FMU bad packet reply         IO向FMU反馈包错误标志*/
 #define PKT_CODE_ERROR		0x80	/* IO->FMU register op error reply */
 
 #define PKT_CODE_MASK		0xc0

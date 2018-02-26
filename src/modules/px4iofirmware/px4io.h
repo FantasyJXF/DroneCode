@@ -94,8 +94,10 @@ extern uint16_t			r_page_servo_disarmed[];	/* PX4IO_PAGE_DISARMED_PWM */
 
 /*
  * Register aliases.
+ * 寄存器别名
  *
  * Handy aliases for registers that are widely used.
+ * 方便的别名，用于广泛使用的寄存器。
  */
 #define r_status_flags		r_page_status[PX4IO_P_STATUS_FLAGS]
 #define r_status_alarms		r_page_status[PX4IO_P_STATUS_ALARMS]
@@ -140,6 +142,7 @@ struct sys_state_s {
 
 	/**
 	 * Last FMU receive time, in microseconds since system boot
+	 * 上一次FMU接收的时间，从系统启动，以毫秒为单位
 	 */
 	volatile uint64_t	fmu_data_received_time;
 

@@ -368,12 +368,12 @@ user_start(int argc, char *argv[])
 
 		/* kick the mixer */
 		perf_begin(mixer_perf);
-		mixer_tick();
+		mixer_tick(); // 混控更新
 		perf_end(mixer_perf);
 
 		/* kick the control inputs */
 		perf_begin(controls_perf);
-		controls_tick();
+		controls_tick(); // 获取遥控器输入
 		perf_end(controls_perf);
 
 		/* some boards such as Pixhawk 2.1 made

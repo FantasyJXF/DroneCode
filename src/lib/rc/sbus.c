@@ -194,7 +194,7 @@ sbus1_output(int sbus_fd, uint16_t *values, uint16_t num_values)
 		uint8_t	oframe[SBUS_FRAME_SIZE] = { 0x0f };
 
 		/* 16 is sbus number of servos/channels minus 2 single bit channels.
-		* currently ignoring single bit channels.  */
+		 * currently ignoring single bit channels.  */
 
 		for (unsigned i = 0; (i < num_values) && (i < 16); ++i) {
 			value = (uint16_t)(((values[i] - SBUS_SCALE_OFFSET) / SBUS_SCALE_FACTOR) + .5f);
@@ -234,6 +234,7 @@ sbus_input(int sbus_fd, uint16_t *values, uint16_t *num_values, bool *sbus_fails
 	/*
 	 * The S.BUS protocol doesn't provide reliable framing,
 	 * so we detect frame boundaries by the inter-frame delay.
+	 * S.BUS协议不提供可靠的帧，因此根据帧间的延迟检测帧的边缘
 	 *
 	 * The minimum frame spacing is 7ms; with 25 bytes at 100000bps
 	 * frame transmission time is ~2ms.
@@ -245,6 +246,7 @@ sbus_input(int sbus_fd, uint16_t *values, uint16_t *num_values, bool *sbus_fails
 	 * In the case where byte(s) are dropped from a frame, this also
 	 * provides a degree of protection. Of course, it would be better
 	 * if we didn't drop bytes...
+	 * 不丢字节
 	 */
 	now = hrt_absolute_time();
 
@@ -264,6 +266,7 @@ sbus_input(int sbus_fd, uint16_t *values, uint16_t *num_values, bool *sbus_fails
 
 	/*
 	 * Try to decode something with what we got
+	 * 解析获得的S.BUS数据
 	 */
 	if (sbus_parse(now, &buf[0], ret, values, num_values, sbus_failsafe,
 		       sbus_frame_drop, &sbus_frame_drops, max_channels)) {
@@ -292,7 +295,7 @@ sbus_parse(uint64_t now, uint8_t *frame, unsigned len, uint16_t *values,
 		/* overflow check */
 		if (partial_frame_count == sizeof(sbus_frame) / sizeof(sbus_frame[0])) {
 			partial_frame_count = 0;
-			sbus_decode_state = SBUS2_DECODE_STATE_DESYNC;
+			sbus_decode_state = SBUS2_DECODE_STATE_DESYNC; // 同步
 #ifdef SBUS_DEBUG
 			printf("SBUS2: RESET (BUF LIM)\n");
 #endif
@@ -348,6 +351,7 @@ sbus_parse(uint64_t now, uint8_t *frame, unsigned len, uint16_t *values,
 				/*
 				 * Great, it looks like we might have a frame.  Go ahead and
 				 * decode it.
+				 * 得到了完整的一帧，进行解析
 				 */
 				decode_ret = sbus_decode(now, sbus_frame, values, num_values, sbus_failsafe, sbus_frame_drop, max_channels);
 

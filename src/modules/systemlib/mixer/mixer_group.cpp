@@ -154,6 +154,7 @@ MixerGroup::load_from_buf(const char *buf, unsigned &buflen)
 
 		/*
 		 * Use the next character as a hint to decide which mixer class to construct.
+		 * 确定构建哪一个混控器类
 		 */
 		switch (*p) {
 		case 'Z':

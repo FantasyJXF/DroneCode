@@ -96,6 +96,7 @@ mixer_tick(void)
 {
 
 	/* check that we are receiving fresh data from the FMU */
+	// 检查是否从FMU获取到新的数据
 	if ((system_state.fmu_data_received_time == 0) ||
 	    hrt_elapsed_time(&system_state.fmu_data_received_time) > FMU_INPUT_DROP_LIMIT_US) {
 
@@ -111,10 +112,12 @@ mixer_tick(void)
 		r_status_flags |= PX4IO_P_STATUS_FLAGS_FMU_OK;
 
 		/* this flag is never cleared once OK */
+		// 一旦OK，这个标志位将不会再被清除
 		r_status_flags |= PX4IO_P_STATUS_FLAGS_FMU_INITIALIZED;
 	}
 
 	/* default to failsafe mixing - it will be forced below if flag is set */
+	// 默认为失效保护混控
 	source = MIX_FAILSAFE;
 
 	/*
@@ -134,6 +137,7 @@ mixer_tick(void)
 		    (r_status_flags & PX4IO_P_STATUS_FLAGS_MIXER_OK)) {
 
 			/* mix from FMU controls */
+			// 使用FMU控制混控
 			source = MIX_FMU;
 		}
 
@@ -205,6 +209,7 @@ mixer_tick(void)
 
 	/*
 	 * Set failsafe status flag depending on mixing source
+	 * 根据混控源设置实效保护状态标志
 	 */
 	if (source == MIX_FAILSAFE) {
 		r_status_flags |= PX4IO_P_STATUS_FLAGS_FAILSAFE;
@@ -267,7 +272,7 @@ mixer_tick(void)
 		/* store normalized outputs */
 		// 保存归一化的输出
 		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) {
-			r_page_actuators[i] = FLOAT_TO_REG(outputs[i]); // 最终的输出值  传到FMU
+			r_page_actuators[i] = FLOAT_TO_REG(outputs[i]); // 混控后最终的输出值  传到FMU
 		}
 	}
 
@@ -281,6 +286,7 @@ mixer_tick(void)
 
 	if (needs_to_arm && !mixer_servos_armed) {
 		/* need to arm, but not armed */
+		// 需要解锁，但是没有解锁
 		up_pwm_servo_arm(true);
 		mixer_servos_armed = true;
 		r_status_flags |= PX4IO_P_STATUS_FLAGS_OUTPUTS_ARMED;
@@ -288,6 +294,7 @@ mixer_tick(void)
 
 	} else if (!needs_to_arm && mixer_servos_armed) {
 		/* armed but need to disarm */
+		// 已经解锁了，但是需要上锁
 		up_pwm_servo_arm(false);
 		mixer_servos_armed = false;
 		r_status_flags &= ~(PX4IO_P_STATUS_FLAGS_OUTPUTS_ARMED);
@@ -298,7 +305,7 @@ mixer_tick(void)
 	    && !(r_setup_arming & PX4IO_P_SETUP_ARMING_LOCKDOWN)) {
 		/* update the servo outputs. */
 		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) {
-			up_pwm_servo_set(i, r_page_servos[i]);
+			up_pwm_servo_set(i, r_page_servos[i]); // 更新每个电机的输出大小
 		}
 
 		/* set S.BUS1 or S.BUS2 outputs */
@@ -378,6 +385,7 @@ mixer_callback(uintptr_t handle,
 	}
 
 	/* apply trim offsets for override channels */
+	// 为覆盖通道应用微调补偿
 	if (source == MIX_OVERRIDE || source == MIX_OVERRIDE_FMU_OK) {
 		if (control_group == actuator_controls_s::GROUP_INDEX_ATTITUDE &&
 		    control_index == actuator_controls_s::INDEX_ROLL) {
@@ -478,6 +486,7 @@ mixer_handle_text(const void *buffer, size_t length)
 		isr_debug(2, "append %d", length);
 
 		/* check for overflow - this would be really fatal */
+		// 检查是否溢出
 		if ((mixer_text_length + text_length + 1) > sizeof(mixer_text)) {
 			r_status_flags &= ~PX4IO_P_STATUS_FLAGS_MIXER_OK;
 			return 0;
@@ -490,6 +499,7 @@ mixer_handle_text(const void *buffer, size_t length)
 		isr_debug(2, "buflen %u", mixer_text_length);
 
 		/* process the text buffer, adding new mixers as their descriptions can be parsed */
+		// 处理混控文本，添加新的混控，因为它们的描述可以被解析
 		unsigned resid = mixer_text_length;
 		mixer_group.load_from_buf(&mixer_text[0], resid);
 

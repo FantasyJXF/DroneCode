@@ -60,6 +60,7 @@ static void	pwm_configure_rates(uint16_t map, uint16_t defaultrate, uint16_t alt
  * PAGE 0
  *
  * Static configuration parameters.
+ * 静态配置参数
  */
 static const uint16_t	r_page_config[] = {
 	[PX4IO_P_CONFIG_PROTOCOL_VERSION]	= PX4IO_PROTOCOL_VERSION,
@@ -81,6 +82,7 @@ static const uint16_t	r_page_config[] = {
  * PAGE 1
  *
  * Status values.
+ * 状态值
  */
 uint16_t		r_page_status[] = {
 	[PX4IO_P_STATUS_FREEMEM]		= 0,
@@ -99,6 +101,7 @@ uint16_t		r_page_status[] = {
  * PAGE 2
  *
  * Post-mixed actuator values.
+ * 混控后的执行器值
  */
 uint16_t 		r_page_actuators[PX4IO_SERVO_COUNT];
 
@@ -106,6 +109,7 @@ uint16_t 		r_page_actuators[PX4IO_SERVO_COUNT];
  * PAGE 3
  *
  * Servo PWM values
+ * 电机的PWM值
  */
 uint16_t		r_page_servos[PX4IO_SERVO_COUNT];
 
@@ -113,6 +117,7 @@ uint16_t		r_page_servos[PX4IO_SERVO_COUNT];
  * PAGE 4
  *
  * Raw RC input
+ * 原始遥控器输入
  */
 uint16_t		r_page_raw_rc_input[] = {
 	[PX4IO_P_RAW_RC_COUNT]			= 0,
@@ -128,6 +133,7 @@ uint16_t		r_page_raw_rc_input[] = {
  * PAGE 5
  *
  * Scaled/routed RC input
+ * 缩放/路由过的遥控器输入
  */
 uint16_t		r_page_rc_input[] = {
 	[PX4IO_P_RC_VALID]			= 0,
@@ -136,6 +142,7 @@ uint16_t		r_page_rc_input[] = {
 
 /**
  * Scratch page; used for registers that are constructed as-read.
+ * 临时页面; 用于构建为已读的寄存器。
  *
  * PAGE 6 Raw ADC input.
  * PAGE 7 PWM rate maps.
@@ -146,6 +153,7 @@ uint16_t		r_page_scratch[32];
  * PAGE 100
  *
  * Setup registers
+ * 设置寄存器
  */
 volatile uint16_t	r_page_setup[] = {
 #ifdef CONFIG_ARCH_BOARD_PX4IO_V2
@@ -211,6 +219,7 @@ volatile uint16_t	r_page_setup[] = {
  * PAGE 101
  *
  * Control values from the FMU.
+ * 来自FMU的控制值
  */
 volatile uint16_t	r_page_controls[PX4IO_CONTROL_GROUPS * PX4IO_CONTROL_CHANNELS];
 
@@ -222,10 +231,12 @@ volatile uint16_t	r_page_controls[PX4IO_CONTROL_GROUPS * PX4IO_CONTROL_CHANNELS]
  * PAGE 103
  *
  * R/C channel input configuration.
+ * 遥控器输入配置
  */
 uint16_t		r_page_rc_input_config[PX4IO_RC_INPUT_CHANNELS * PX4IO_P_RC_CONFIG_STRIDE];
 
 /* valid options */
+// 有效选项
 #define PX4IO_P_RC_CONFIG_OPTIONS_VALID	(PX4IO_P_RC_CONFIG_OPTIONS_REVERSE | PX4IO_P_RC_CONFIG_OPTIONS_ENABLED)
 
 /*
@@ -236,8 +247,10 @@ uint16_t		r_page_rc_input_config[PX4IO_RC_INPUT_CHANNELS * PX4IO_P_RC_CONFIG_STR
  * PAGE 105
  *
  * Failsafe servo PWM values
+ * 失效保护下的电机PWM值
  *
  * Disable pulses as default.
+ * 默认禁止脉冲
  */
 uint16_t		r_page_servo_failsafe[PX4IO_SERVO_COUNT] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -245,6 +258,7 @@ uint16_t		r_page_servo_failsafe[PX4IO_SERVO_COUNT] = { 0, 0, 0, 0, 0, 0, 0, 0 };
  * PAGE 106
  *
  * minimum PWM values when armed
+ * 解锁时的最小PWM值
  *
  */
 uint16_t		r_page_servo_control_min[PX4IO_SERVO_COUNT] = { PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN, PWM_DEFAULT_MIN };
@@ -253,6 +267,7 @@ uint16_t		r_page_servo_control_min[PX4IO_SERVO_COUNT] = { PWM_DEFAULT_MIN, PWM_D
  * PAGE 107
  *
  * maximum PWM values when armed
+ * 解锁时的最大PWM值
  *
  */
 uint16_t		r_page_servo_control_max[PX4IO_SERVO_COUNT] = { PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX, PWM_DEFAULT_MAX };
@@ -260,7 +275,8 @@ uint16_t		r_page_servo_control_max[PX4IO_SERVO_COUNT] = { PWM_DEFAULT_MAX, PWM_D
 /**
  * PAGE 108
  *
- * disarmed PWM values for difficult ESCs
+ * disarmed PWM values for diffrent ESCs
+ * 不同电调上锁时的PWM值
  *
  */
 uint16_t		r_page_servo_disarmed[PX4IO_SERVO_COUNT] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -272,6 +288,7 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 	switch (page) {
 
 	/* handle bulk controls input */
+	// 处理批量控制输入
 	case PX4IO_PAGE_CONTROLS:
 
 		/* copy channel data */
@@ -290,6 +307,7 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 		break;
 
 	/* handle raw PWM input */
+	// 处理原始的PWM输入
 	case PX4IO_PAGE_DIRECT_PWM:
 
 		/* copy channel data */
@@ -311,6 +329,7 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 		break;
 
 	/* handle setup for servo failsafe values */
+	// 处理电机失效保护值的设置
 	case PX4IO_PAGE_FAILSAFE_PWM:
 
 		/* copy channel data */
@@ -386,6 +405,7 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 
 		break;
 
+	// 处理上锁时的PWM值
 	case PX4IO_PAGE_DISARMED_PWM: {
 			/* flag for all outputs */
 			bool all_disarmed_off = true;
@@ -417,20 +437,26 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 
 			if (all_disarmed_off) {
 				/* disable PWM output if disarmed */
+				// 上锁时禁用PWM输出
 				r_setup_arming &= ~(PX4IO_P_SETUP_ARMING_ALWAYS_PWM_ENABLE);
 
 			} else {
 				/* enable PWM output always */
+				// 总是使能PWM输出
 				r_setup_arming |= PX4IO_P_SETUP_ARMING_ALWAYS_PWM_ENABLE;
 			}
 		}
 		break;
 
 	/* handle text going to the mixer parser */
+	// 处理进入到混控器解析模块的文本文件
 	case PX4IO_PAGE_MIXERLOAD:
 		/* do not change the mixer if FMU is armed and IO's safety is off
 		 * this state defines an active system. This check is done in the
 		 * text handling function.
+		 * 当FMU已经解锁并且IO的安全开关被按下后不要更改混控器
+		 * 此时系统已经激活
+		 * 该检查在文本处理功能中完成
 		 */
 		return mixer_handle_text(values, num_values * sizeof(*values));
 
@@ -442,6 +468,7 @@ registers_set(uint8_t page, uint8_t offset, const uint16_t *values, unsigned num
 		}
 
 		/* iterate individual registers, set each in turn */
+		// 迭代各个寄存器，依次设置每个寄存器
 		while (num_values--) {
 			if (registers_set_one(page, offset, *values)) {
 				return -1;
@@ -487,6 +514,7 @@ registers_set_one(uint8_t page, uint8_t offset, uint16_t value)
 			if (PX4IO_P_STATUS_FLAGS_MIXER_OK & r_status_flags) {
 
 				/* update failsafe values, now that the mixer is set to ok */
+				// 更新失控保护值，现在混控器已经设置好了
 				mixer_set_failsafe();
 			}
 
@@ -505,6 +533,7 @@ registers_set_one(uint8_t page, uint8_t offset, uint16_t value)
 
 			value &= PX4IO_P_SETUP_FEATURES_VALID;
 
+			// 优先使用SBUS
 			/* some of the options conflict - give S.BUS out precedence, then ADC RSSI, then PWM RSSI */
 
 			/* switch S.Bus output pin as needed */

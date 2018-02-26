@@ -35,6 +35,7 @@
  * @file mixer.h
  *
  * Generic, programmable, procedural control signal mixers.
+ * 通用的，可编程的程序控制信号混控器
  *
  * This library implements a generic mixer interface that can be used
  * by any driver or subsytem that wants to combine several control signals
@@ -46,12 +47,15 @@
  * control value
  *	A mixer input value, typically provided by some controlling
  *	component of the system.
+ *   一个混控输入值，典型的是由一些系统控制组件提供
  *
  * control group
  * 	A collection of controls provided by a single controlling component.
+ *   由单个控制组件提供的一组控制集合
  *
  * actuator
  *	The mixer output value.
+ *   混控输出值
  *
  *
  * Mixing basics
@@ -62,6 +66,8 @@
  * the actuator's configuration and then combined to produce the
  * actuator value, which may then be further scaled to suit the specific
  * output type.
+ * 执行器从一个或多个控制值的组合中导出其值。 
+ * 根据执行器的配置对每个控制值进行缩放，然后将其组合以产生执行器值，然后可以进一步缩放该值以适应特定的输出类型。
  *
  * Internally, all scaling is performed using floating point values.
  * Inputs and outputs are clamped to the range -1.0 to 1.0.

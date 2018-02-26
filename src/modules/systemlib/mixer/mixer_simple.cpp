@@ -156,7 +156,7 @@ SimpleMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handle, c
 	const char *end = buf + buflen;
 
 	/* get the base info for the mixer */
-	if (sscanf(buf, "M: %u%n", &inputs, &used) != 1) {
+	if (sscanf(buf, "M: %u%n", &inputs, &used) != 1) { // 读取格式化的字符串中的数据
 		debug("simple parse failed on '%s'", buf);
 		goto out;
 	}
@@ -177,12 +177,14 @@ SimpleMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handle, c
 
 	mixinfo->control_count = inputs;
 
+	// 解析输出缩放因子 "O"
 	if (parse_output_scaler(end - buflen, buflen, mixinfo->output_scaler)) {
 		debug("simple mixer parser failed parsing out scaler tag, ret: '%s'", buf);
 		goto out;
 	}
 
 	for (unsigned i = 0; i < inputs; i++) {
+		// 解析控制缩放因子 "S"
 		if (parse_control_scaler(end - buflen, buflen,
 					 mixinfo->controls[i].scaler,
 					 mixinfo->controls[i].control_group,

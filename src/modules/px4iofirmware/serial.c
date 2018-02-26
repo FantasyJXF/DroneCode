@@ -35,6 +35,7 @@
  * @file serial.c
  *
  * Serial communication for the PX4IO module.
+ * PX4IO模块的通讯
  */
 
 #include <stdint.h>
@@ -173,6 +174,7 @@ rx_handle_packet(void)
 	if (PKT_CODE(dma_packet) == PKT_CODE_WRITE) {
 
 		/* it's a blind write - pass it on */
+		// 设置IO寄存器的值
 		if (registers_set(dma_packet.page, dma_packet.offset, &dma_packet.regs[0], PKT_COUNT(dma_packet))) {
 			perf_count(pc_regerr);
 			dma_packet.count_code = PKT_CODE_ERROR;
@@ -187,6 +189,7 @@ rx_handle_packet(void)
 	if (PKT_CODE(dma_packet) == PKT_CODE_READ) {
 
 		/* it's a read - get register pointer for reply */
+		// 读取寄存器指针
 		unsigned count;
 		uint16_t *registers;
 
@@ -224,6 +227,7 @@ rx_dma_callback(DMA_HANDLE handle, uint8_t status, void *arg)
 	/*
 	 * We are here because DMA completed, or UART reception stopped and
 	 * we think we have a packet in the buffer.
+	 * 缓冲区中已经有一个包
 	 */
 	perf_begin(pc_txns);
 
