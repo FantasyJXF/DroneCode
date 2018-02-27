@@ -300,6 +300,7 @@ Navigator::task_main()
 	}
 
 	/* do subscriptions */
+	// 订阅一些主题
 	_global_pos_sub = orb_subscribe(ORB_ID(vehicle_global_position));
 	_gps_pos_sub = orb_subscribe(ORB_ID(vehicle_gps_position));
 	_sensor_combined_sub = orb_subscribe(ORB_ID(sensor_combined));
@@ -314,6 +315,7 @@ Navigator::task_main()
 	_vehicle_command_sub = orb_subscribe(ORB_ID(vehicle_command));
 
 	/* copy all topics first time */
+	// 更新主题
 	vehicle_status_update();
 	vehicle_land_detected_update();
 	vehicle_control_mode_update();
@@ -328,7 +330,7 @@ Navigator::task_main()
 	px4_pollfd_struct_t fds[1] = {};
 
 	/* Setup of loop */
-	fds[0].fd = _global_pos_sub;
+	fds[0].fd = _global_pos_sub; // 定义文件描述符为global_pos_pub的句柄
 	fds[0].events = POLLIN;
 
 	bool global_pos_available_once = false;
@@ -429,6 +431,7 @@ Navigator::task_main()
 				struct position_setpoint_triplet_s *rep = get_reposition_triplet();
 
 				// store current position as previous position and goal as next
+				// 将当前的位置保存为上一刻的位置，并将目标位置作为下一刻的位置
 				rep->previous.yaw = get_global_position()->yaw;
 				rep->previous.lat = get_global_position()->lat;
 				rep->previous.lon = get_global_position()->lon;

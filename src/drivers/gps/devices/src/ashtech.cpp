@@ -61,7 +61,7 @@ GPSDriverAshtech::~GPSDriverAshtech()
  * All NMEA descriptions are taken from
  * http://www.trimble.com/OEM_ReceiverHelp/V4.44/en/NMEA-0183messages_MessageOverview.html
  */
-
+// 处理NMEA0183数据
 int GPSDriverAshtech::handleMessage(int len)
 {
 	char *endp;
@@ -572,6 +572,7 @@ int GPSDriverAshtech::receive(unsigned timeout)
 				if ((l = parseChar(buf[j])) > 0) {
 					/* return to configure during configuration or to the gps driver during normal work
 					 * if a packet has arrived */
+					 // 处理获取到的NMEA0183消息包
 					if (handleMessage(l) > 0) {
 						return 1;
 					}
@@ -609,6 +610,7 @@ int GPSDriverAshtech::receive(unsigned timeout)
 }
 #define HEXDIGIT_CHAR(d) ((char)((d) + (((d) < 0xA) ? '0' : 'A'-0xA)))
 
+// 一个字节一个字节的解析读取到的数据并组包
 int GPSDriverAshtech::parseChar(uint8_t b)
 {
 	int iRet = 0;

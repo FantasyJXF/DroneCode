@@ -116,7 +116,7 @@ struct mission_item_s {
 			float ___lon_float;			/**< padding */
 			float altitude;				/**< altitude in meters	(AMSL)			*/
 		};
-		float params[7];				/**< array to store mission command values for MAV_FRAME_MISSION ***/
+		float params[7];				/**< array to store mission command values for MAV_FRAME_MISSION 保存任务命令值的数组 ***/
 	};
 	uint16_t nav_cmd;					/**< navigation command					*/
 	int16_t do_jump_mission_index;		/**< index where the do jump will go to                 */

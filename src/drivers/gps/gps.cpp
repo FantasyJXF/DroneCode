@@ -127,7 +127,7 @@ private:
 	bool        			_mode_auto;					///< if true, auto-detect which GPS is attached
 	gps_driver_mode_t		_mode;						///< current mode
 	GPSHelper::Interface  _interface;   						///< interface
-	GPSHelper			*_helper;					///< instance of GPS parser
+	GPSHelper			*_helper;					///< instance of GPS parser GPS解析器的实例
 	GPS_Sat_Info			*_sat_info;					///< instance of GPS sat info data object
 	struct vehicle_gps_position_s	_report_gps_pos;				///< uORB topic for gps position
 	orb_advert_t			_report_gps_pos_pub;				///< uORB pub for gps position
@@ -743,6 +743,7 @@ GPS::task_main()
 					/* Publish initial report that we have access to a GPS,
 					 * but set all critical state fields to indicate we have
 					 * no valid position lock
+					 * 获取了GPS权限，但是还没有获得有效的位置锁定
 					 */
 
 					/* reset the timestamp for data, because we have no data yet */
@@ -765,6 +766,7 @@ GPS::task_main()
 				while ((helper_ret = _helper->receive(TIMEOUT_5HZ)) > 0 && !_task_should_exit) {
 
 					if (helper_ret & 1) {
+						// 发布GPS数据
 						publish();
 
 						last_rate_count++;
@@ -775,9 +777,10 @@ GPS::task_main()
 					}
 
 					/* measure update rate every 5 seconds */
+					// 每5秒测量一次更新速率
 					if (hrt_absolute_time() - last_rate_measurement > RATE_MEASUREMENT_PERIOD) {
 						float dt = (float)((hrt_absolute_time() - last_rate_measurement)) / 1000000.0f;
-						_rate = last_rate_count / dt;
+						_rate = last_rate_count / dt; // 计算GPS更新频率
 						_rate_rtcm_injection = _last_rate_rtcm_injection_count / dt;
 						last_rate_measurement = hrt_absolute_time();
 						last_rate_count = 0;
@@ -820,7 +823,7 @@ GPS::task_main()
 				}
 			}
 
-			if (_mode_auto) {
+			if (_mode_auto) { // 自动选择模式，逐个判断
 				switch (_mode) {
 				case GPS_DRIVER_MODE_UBX:
 					_mode = GPS_DRIVER_MODE_MTK;

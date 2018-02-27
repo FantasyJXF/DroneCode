@@ -49,34 +49,61 @@
 enum class GPSCallbackType {
 	/**
 	 * Read data from device. This is a blocking operation with a timeout.
+	 * 从设备读取数据。这是一个包含超时的阻塞操作。
+	 * 
 	 * data1: points to a buffer to be written to. The first sizeof(int) bytes contain the
 	 *        timeout in ms when calling the method.
+	 * data1: 指向一个要写入的缓存，前4个字节(sizeof(int))是调用此方法时的超时时间timeout,以毫秒为单位
+	 * 
 	 * data2: buffer length in bytes. Less bytes than this can be read.
+	 * data2: 缓存大小，以字节为单位。可以读取更少的字节
+	 *
 	 * return: num read bytes, 0 on timeout (the method can actually also return 0 before
 	 *         the timeout happens).
+	 * 返回值: 读取到的字节，0表示超时
 	 */
 	readDeviceData = 0,
 
 	/**
 	 * Write data to device
+	 * 向设备中写入数据
+	 *
 	 * data1: data to be written
+	 * data1: 要写入的数据
+	 *
 	 * data2: number of bytes to write
+	 * data2: 要写入的字节数
+	 *
 	 * return: num written bytes
+	 * 返回值: 实际写入的字节数
 	 */
 	writeDeviceData,
 
 	/**
 	 * set Baudrate
+	 * 设置波特率
+	 *
 	 * data1: ignored
+	 * data1: 忽略
+	 *
 	 * data2: baudrate
+	 * data2: 波特率
+	 *
 	 * return: 0 on success
+	 * 返回值: 成功则返回0
 	 */
 	setBaudrate,
 
 	/**
 	 * Got an RTCM message from the device.
+	 * 从设备中获得RTCM消息 
+	 *
 	 * data1: pointer to the message
+	 * data1: 指向消息的指针
+	 *
 	 * data2: message length
+	 * data2: 消息长度
+	 *
 	 * return: ignored
 	 */
 	gotRTCMMessage,
@@ -133,6 +160,8 @@ public:
 
 	/**
 	 * configure the device
+	 * 配置设备
+  	 *
 	 * @param baud will be set to the baudrate (output parameter)
 	 * @return 0 on success, <0 otherwise
 	 */
@@ -192,6 +221,7 @@ protected:
 	 * set the Baudrate
 	 * @param baudrate
 	 * @return 0 on success, <0 otherwise
+	 * 成功则返回0，否则返回一个小于0的数
 	 */
 	int setBaudrate(int baudrate)
 	{

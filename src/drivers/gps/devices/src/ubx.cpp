@@ -397,7 +397,13 @@ GPSDriverUBX::waitForAck(const uint16_t msg, const unsigned timeout, const bool 
 	return ret;
 }
 
-int	// -1 = error, 0 = no message handled, 1 = message handled, 2 = sat info message handled
+// -1 = error, 0 = no message handled, 1 = message handled, 2 = sat info message handled
+// 返回值 
+// -1: 错误
+//  0: 没有消息处理
+//  1: 处理了消息
+//  2: 处理了卫星消息
+int	
 GPSDriverUBX::receive(unsigned timeout)
 {
 	uint8_t buf[GPS_READ_BUFFER_SIZE];

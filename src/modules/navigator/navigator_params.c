@@ -42,6 +42,7 @@
 
 /**
  * Loiter radius (FW only)
+ * 盘旋半径(仅用于固定翼)
  *
  * Default value of loiter radius for missions, loiter, RTL, etc. (fixedwing only).
  *
