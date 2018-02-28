@@ -324,7 +324,7 @@ int GPS::init()
 
 	/* start the GPS driver worker task */
 	_task = px4_task_spawn_cmd("gps", SCHED_DEFAULT,
-				   SCHED_PRIORITY_SLOW_DRIVER, 1200, (px4_main_t)&GPS::task_main_trampoline, args);
+				   SCHED_PRIORITY_SLOW_DRIVER, 2000, (px4_main_t)&GPS::task_main_trampoline, args);
 
 	if (_task < 0) {
 		PX4_WARN("task start failed: %d", errno);
@@ -381,7 +381,7 @@ int GPS::callback(GPSCallbackType type, void *data1, int data2, void *user)
 
 int GPS::pollOrRead(uint8_t *buf, size_t buf_length, int timeout)
 {
-	handleInjectDataTopic();
+	//handleInjectDataTopic();
 
 #if !defined(__PX4_QURT)
 
@@ -693,6 +693,8 @@ GPS::task_main()
 			_report_gps_pos.vel_ned_valid = true;
 			_report_gps_pos.satellites_used = 10;
 
+			PX4_WARN("_fake_gps init");
+
 			/* no time and satellite information simulated */
 
 
@@ -704,6 +706,7 @@ GPS::task_main()
 
 			if (_helper != nullptr) {
 				delete(_helper);
+				//warn("delete _helper");
 				/* set to zero to ensure parser is not used while not instantiated */
 				_helper = nullptr;
 			}
@@ -756,22 +759,30 @@ GPS::task_main()
 
 					publish();
 
+					PX4_INFO("ubx connected and reset to 0");
+
 					/* GPS is obviously detected successfully, reset statistics */
 					_helper->resetUpdateRates();
 				}
 
 				int helper_ret;
 
-				while ((helper_ret = _helper->receive(TIMEOUT_5HZ)) > 0 && !_task_should_exit) {
+				while ((helper_ret = _helper->receive(500)) > 0 && !_task_should_exit) {
 
-					if (helper_ret & 1) {
+					_mode_auto = false;
+
+					if (helper_ret == 1) {
 						publish();
-
 						last_rate_count++;
 					}
 
-					if (_p_report_sat_info && (helper_ret & 2)) {
+					if (_p_report_sat_info && (helper_ret == 2)) {
 						publishSatelliteInfo();
+					}
+					else if(helper_ret<0)
+					{
+
+						PX4_WARN("GPS COMM LOST!");						
 					}
 
 					/* measure update rate every 5 seconds */
@@ -788,26 +799,26 @@ GPS::task_main()
 
 					if (!_healthy) {
 						// Helpful for debugging, but too verbose for normal ops
-//						const char *mode_str = "unknown";
-//
-//						switch (_mode) {
-//						case GPS_DRIVER_MODE_UBX:
-//							mode_str = "UBX";
-//							break;
-//
-//						case GPS_DRIVER_MODE_MTK:
-//							mode_str = "MTK";
-//							break;
-//
-//						case GPS_DRIVER_MODE_ASHTECH:
-//							mode_str = "ASHTECH";
-//							break;
-//
-//						default:
-//							break;
-//						}
-//
-//						PX4_WARN("module found: %s", mode_str);
+						const char *mode_str = "unknown";
+
+						switch (_mode) {
+						case GPS_DRIVER_MODE_UBX:
+							mode_str = "UBX";
+							break;
+
+						case GPS_DRIVER_MODE_MTK:
+							mode_str = "MTK";
+							break;
+
+						case GPS_DRIVER_MODE_ASHTECH:
+							mode_str = "ASHTECH";
+							break;
+
+						default:
+							break;
+						}
+
+						PX4_WARN("module found: %s", mode_str);
 						_healthy = true;
 					}
 				}
@@ -821,17 +832,20 @@ GPS::task_main()
 			}
 
 			if (_mode_auto) {
-				switch (_mode) {
+				switch (_mode) { // 轮巡查看连接的是哪一个GPS
 				case GPS_DRIVER_MODE_UBX:
 					_mode = GPS_DRIVER_MODE_MTK;
+					//PX4_WARN("_mode_auto is GPS_DRIVER_MODE_MTK");
 					break;
 
 				case GPS_DRIVER_MODE_MTK:
 					_mode = GPS_DRIVER_MODE_ASHTECH;
+					//PX4_WARN("_mode_auto is GPS_DRIVER_MODE_ASHTECH");
 					break;
 
 				case GPS_DRIVER_MODE_ASHTECH:
 					_mode = GPS_DRIVER_MODE_UBX;
+					//PX4_WARN("_mode_auto is GPS_DRIVER_MODE_UBX");
 					break;
 
 				default:
@@ -924,7 +938,7 @@ GPS::print_info()
 
 	}
 
-	usleep(100000);
+//	usleep(100000);
 }
 
 void
@@ -932,12 +946,12 @@ GPS::publish()
 {
 	if (_gps_num == 1) {
 		orb_publish_auto(ORB_ID(vehicle_gps_position), &_report_gps_pos_pub, &_report_gps_pos, &_gps_orb_instance,
-				 ORB_PRIO_DEFAULT);
+				ORB_PRIO_DEFAULT);
 		is_gps1_advertised = true;
 
 	} else if (is_gps1_advertised) {
 		orb_publish_auto(ORB_ID(vehicle_gps_position), &_report_gps_pos_pub, &_report_gps_pos, &_gps_orb_instance,
-				 ORB_PRIO_DEFAULT);
+				ORB_PRIO_DEFAULT);
 	}
 
 }

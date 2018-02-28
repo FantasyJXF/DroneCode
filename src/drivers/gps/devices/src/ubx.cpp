@@ -1010,6 +1010,7 @@ GPSDriverUBX::payloadRxDone(void)
 
 #ifndef NO_MKTIME
 			time_t epoch = mktime(&timeinfo);
+			epoch = epoch + 28800;
 
 			if (epoch > GPS_EPOCH_SECS) {
 				// FMUv2+ boards have a hardware RTC, but GPS helps us to configure it
@@ -1113,6 +1114,7 @@ GPSDriverUBX::payloadRxDone(void)
 			timeinfo.tm_sec		= _buf.payload_rx_nav_timeutc.sec;
 #ifndef NO_MKTIME
 			time_t epoch = mktime(&timeinfo);
+			epoch = epoch + 28800;
 
 			// only set the time if it makes sense
 

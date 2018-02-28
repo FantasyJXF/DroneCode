@@ -54,6 +54,9 @@ public:
 
 
 private:
+	uint32_t crc32Count;
+	uint32_t crc32;
+	uint32_t crc32raw;
 	void decodeInit(void);
 	int handleMessage(int len);
 	int parseChar(uint8_t b);
@@ -65,15 +68,24 @@ private:
 	/** Read char ASHTECH parameter */
 	char read_char();
 
+	uint32_t CRC32Value(uint32_t i);
+	uint32_t CalculateBlockCRC32(uint32_t ulCount,unsigned char *ucBuffer );
+	uint8_t *buffercrc;
+	uint8_t *bufendcrc;
+
 	enum ashtech_decode_state_t {
 		NME_DECODE_UNINIT,
 		NME_DECODE_GOT_SYNC1,
 		NME_DECODE_GOT_ASTERIKS,
-		NME_DECODE_GOT_FIRST_CS_BYTE
+		NME_DECODE_GOT_FIRST_CS_BYTE,
+		NME_DECODE_GOT_SYNC2,
+		NME_DECODE_GOT_ASTERIKS2,
+		NME_DECODE_GOT_FIRST_CS_BYTE2,
 	};
 
 	struct satellite_info_s *_satellite_info;
 	struct vehicle_gps_position_s *_gps_position;
+	struct vehicle_gps_position_s *_gps_position_last;
 	uint64_t _last_timestamp_time;
 	int _ashtechlog_fd;
 
