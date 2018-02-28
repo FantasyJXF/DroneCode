@@ -160,6 +160,7 @@ MissionBlock::is_mission_item_reached()
 		float dist_xy = -1.0f;
 		float dist_z = -1.0f;
 
+		// 海平面高度
 		float altitude_amsl = _mission_item.altitude_is_relative
 					? _mission_item.altitude + _navigator->get_home_position()->alt
 					: _mission_item.altitude;
@@ -216,11 +217,13 @@ MissionBlock::is_mission_item_reached()
 			float altitude_acceptance_radius = _navigator->get_altitude_acceptance_radius();
 
 			/* It should be safe to just use half of the takoeff_alt as an acceptance radius. */
+			// 只使用一半的takoeff_alt作为接受半径应该是安全的。
 			if (takeoff_alt > 0 && takeoff_alt < altitude_acceptance_radius) {
 				altitude_acceptance_radius = takeoff_alt / 2.0f;
 			}
 
 			/* require only altitude for takeoff for multicopter */
+			// 对于多旋翼的起飞 仅需要高度
 			if (_navigator->get_global_position()->alt >
 					altitude_amsl - altitude_acceptance_radius) {
 				_waypoint_position_reached = true;

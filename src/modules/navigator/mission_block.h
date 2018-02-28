@@ -88,6 +88,7 @@ protected:
 
 	/**
 	 * Convert a mission item to a position setpoint
+	 * 将一个任务项转换成一个位置设定值
 	 *
 	 * @param the mission item to convert
 	 * @param the position setpoint that needs to be set
@@ -96,11 +97,13 @@ protected:
 
 	/**
 	 * Set previous position setpoint to current setpoint
+	 * 将之前的位置设定值设置为当前的位置设定值
 	 */
 	void set_previous_pos_setpoint();
 
 	/**
 	 * Set a loiter mission item, if possible reuse the position setpoint, otherwise take the current position
+	 * 设置loiter任务项，可能的话继续使用位置设定值，否则取当前位置
 	 */
 	void set_loiter_item(struct mission_item_s *item, float min_clearance = -1.0f);
 

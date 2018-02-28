@@ -90,6 +90,7 @@ void
 NavigatorMode::on_activation()
 {
 	/* invalidate position setpoint by default */
+	/* 默认禁用位置设定值 */
 	_navigator->get_position_setpoint_triplet()->current.valid = false;
 }
 

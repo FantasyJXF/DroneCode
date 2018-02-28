@@ -138,6 +138,7 @@ Loiter::reposition()
 
 	if (rep->current.valid) {
 		// set loiter position based on reposition command
+		// 基于reposition命令设置loiter位置
 
 		// convert mission item to current setpoint
 		struct position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
@@ -146,17 +147,17 @@ Loiter::reposition()
 		pos_sp_triplet->previous.lat = _navigator->get_global_position()->lat;
 		pos_sp_triplet->previous.lon = _navigator->get_global_position()->lon;
 		pos_sp_triplet->previous.alt = _navigator->get_global_position()->alt;
-		memcpy(&pos_sp_triplet->current, &rep->current, sizeof(rep->current));
+		memcpy(&pos_sp_triplet->current, &rep->current, sizeof(rep->current)); // 确定sp_triplet为当前triplet
 		pos_sp_triplet->next.valid = false;
 
 		// set yaw
-
 		float travel_dist = get_distance_to_next_waypoint(_navigator->get_global_position()->lat,
 				    _navigator->get_global_position()->lon,
-				    pos_sp_triplet->current.lat, pos_sp_triplet->current.lon);
+				    pos_sp_triplet->current.lat, pos_sp_triplet->current.lon); // 获得到下一个航点的距离
 
 		if (travel_dist > 1.0f) {
 			// calculate direction the vehicle should point to.
+			// 计算飞机应该指向的方向
 			pos_sp_triplet->current.yaw = get_bearing_to_next_waypoint(
 							      _navigator->get_global_position()->lat,
 							      _navigator->get_global_position()->lon,

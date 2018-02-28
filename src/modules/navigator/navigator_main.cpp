@@ -438,17 +438,17 @@ Navigator::task_main()
 				rep->previous.alt = get_global_position()->alt;
 
 				rep->current.loiter_radius = get_loiter_radius();
-				rep->current.loiter_direction = 1;
+				rep->current.loiter_direction = 1; // 顺时针
 				rep->current.type = position_setpoint_s::SETPOINT_TYPE_LOITER;
 
 				// Go on and check which changes had been requested
-				if (PX4_ISFINITE(cmd.param4)) {
+				if (PX4_ISFINITE(cmd.param4)) { // param4为航向控制。值为NaN时航向不变:对于飞机来说表示的是盘旋方向(0顺时针，1逆时针)
 					rep->current.yaw = cmd.param4;
 				} else {
 					rep->current.yaw = NAN;
 				}
 
-				if (PX4_ISFINITE(cmd.param5) && PX4_ISFINITE(cmd.param6)) {
+				if (PX4_ISFINITE(cmd.param5) && PX4_ISFINITE(cmd.param6)) { // param5 纬度，param5 经度   *1E7
 					rep->current.lat = (cmd.param5 < 1000) ? cmd.param5 : cmd.param5 / (double)1e7;
 					rep->current.lon = (cmd.param6 < 1000) ? cmd.param6 : cmd.param6 / (double)1e7;
 
@@ -457,7 +457,7 @@ Navigator::task_main()
 					rep->current.lon = get_global_position()->lon;
 				}
 
-				if (PX4_ISFINITE(cmd.param7)) {
+				if (PX4_ISFINITE(cmd.param7)) { // param7为高度
 					rep->current.alt = cmd.param7;
 				} else {
 					rep->current.alt = get_global_position()->alt;
@@ -596,7 +596,7 @@ Navigator::task_main()
 				break;
 			case vehicle_status_s::NAVIGATION_STATE_AUTO_RTGS:
 				/* Use complex data link loss mode only when enabled via param
-				* otherwise use rtl */
+				 * otherwise use rtl */
 				_pos_sp_triplet_published_invalid_once = false;
 				if (_param_datalinkloss_act.get() == 1) {
 					_navigation_mode = &_loiter;
