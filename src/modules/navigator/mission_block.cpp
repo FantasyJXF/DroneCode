@@ -240,8 +240,13 @@ MissionBlock::is_mission_item_reached()
 			/* Loiter mission item on a non rotary wing: the aircraft is going to circle the
 			 * coordinates with a radius equal to the loiter_radius field. It is not flying
 			 * through the waypoint center.
+			 * 对于非旋翼的loiter任务项:飞机将绕坐标点旋转，旋转半径为loiter_radius的值。
+			 * 而不是飞过航点中心
+			 *
 			 * Therefore the item is marked as reached once the system reaches the loiter
 			 * radius (+ some margin). Time inside and turn count is handled elsewhere.
+			 * 因此一旦飞机抵达loiter半径内，该任务项被标记为到达。
+			 * 停留时间和turn count在别处处理
 			 */
 			if (dist >= 0.0f && dist <= _navigator->get_acceptance_radius(fabsf(_mission_item.loiter_radius) * 1.2f)
 				&& dist_z <= _navigator->get_altitude_acceptance_radius()) {
@@ -460,6 +465,7 @@ MissionBlock::issue_command(const struct mission_item_s *item)
 	} else {
 		PX4_INFO("forwarding command %d", item->nav_cmd);
 		struct vehicle_command_s cmd = {};
+		// 将任务项转换为飞机的命令
 		mission_item_to_vehicle_command(item, &cmd);
 		_action_start = hrt_absolute_time();
 

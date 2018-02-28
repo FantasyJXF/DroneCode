@@ -88,7 +88,9 @@ void
 RTL::on_activation()
 {
 	/* reset starting point so we override what the triplet contained from the previous navigation state */
+	// 重置起始点，因此我们覆盖上一个导航状态所包含的triplet
 	_rtl_start_lock = false;
+	// 设置当前位置任务项
 	set_current_position_item(&_mission_item);
 	struct position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
 	mission_item_to_position_setpoint(&_mission_item, &pos_sp_triplet->current);
@@ -116,6 +118,7 @@ RTL::on_activation()
 
 		} else {
 			/* set altitude setpoint to current altitude */
+			// 将高度设定值为当前的高度
 			_rtl_state = RTL_STATE_RETURN;
 			_mission_item.altitude_is_relative = false;
 			_mission_item.altitude = _navigator->get_global_position()->alt;
@@ -151,7 +154,7 @@ RTL::set_rtl_item()
 
 	switch (_rtl_state) {
 	case RTL_STATE_CLIMB: {
-			float climb_alt = _navigator->get_home_position()->alt + _param_return_alt.get();
+			float climb_alt = _navigator->get_home_position()->alt + _param_return_alt.get(); // 60米
 
 			_mission_item.lat = _navigator->get_global_position()->lat;
 			_mission_item.lon = _navigator->get_global_position()->lon;
@@ -177,6 +180,7 @@ RTL::set_rtl_item()
 			// don't change altitude
 
 			// use home yaw if close to home
+			// 距离Home点近时直接使用home处的yaw值
 			/* check if we are pretty close to home already */
 			float home_dist = get_distance_to_next_waypoint(_navigator->get_home_position()->lat,
 					  _navigator->get_home_position()->lon,
@@ -188,12 +192,14 @@ RTL::set_rtl_item()
 			} else {
 				if (pos_sp_triplet->previous.valid) {
 					/* if previous setpoint is valid then use it to calculate heading to home */
+					// 如果前一个位置设定值有效，那么使用其计算到home的航向
 					_mission_item.yaw = get_bearing_to_next_waypoint(
 								    pos_sp_triplet->previous.lat, pos_sp_triplet->previous.lon,
 								    _mission_item.lat, _mission_item.lon);
 
 				} else {
 					/* else use current position */
+					// 否则使用当前的位置
 					_mission_item.yaw = get_bearing_to_next_waypoint(
 								    _navigator->get_global_position()->lat, _navigator->get_global_position()->lon,
 								    _mission_item.lat, _mission_item.lon);
@@ -225,7 +231,7 @@ RTL::set_rtl_item()
 			_mission_item.lat = _navigator->get_home_position()->lat;
 			_mission_item.lon = _navigator->get_home_position()->lon;
 			_mission_item.altitude_is_relative = false;
-			_mission_item.altitude = _navigator->get_home_position()->alt + _param_descend_alt.get();
+			_mission_item.altitude = _navigator->get_home_position()->alt + _param_descend_alt.get(); // 降落到home点上方30米
 
 			// check if we are already lower - then we will just stay there
 			if (_mission_item.altitude > _navigator->get_global_position()->alt) {
@@ -310,6 +316,7 @@ RTL::set_rtl_item()
 	reset_mission_item_reached();
 
 	/* execute command if set */
+	// 如果设置了的话，则执行命令
 	if (!item_contains_position(&_mission_item)) {
 		issue_command(&_mission_item);
 	}

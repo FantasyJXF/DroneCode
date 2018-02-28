@@ -71,6 +71,7 @@ NavigatorMode::run(bool active)
 
 		} else {
 			/* periodic updates when active */
+			// 激活时周期性更新
 			on_active();
 		}
 

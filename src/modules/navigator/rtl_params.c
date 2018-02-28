@@ -60,6 +60,7 @@ PARAM_DEFINE_FLOAT(RTL_RETURN_ALT, 60);
 
 /**
  * RTL loiter altitude
+ * RTL的loiter高度，返航过程中降落到这个高度后再向home点飞
  *
  * Stay at this altitude above home position after RTL descending.
  * Land (i.e. slowly descend) from this altitude if autolanding allowed.
