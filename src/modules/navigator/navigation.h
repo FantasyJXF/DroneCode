@@ -110,8 +110,8 @@ struct mission_item_s {
 				float pitch_min;		/**< minimal pitch angle for fixed wing takeoff waypoints */
 			};
 			float acceptance_radius;	/**< default radius in which the mission is accepted as reached in meters */
-			float loiter_radius;		/**< loiter radius in meters, 0 for a VTOL to hover, negative for counter-clockwise */
-			float yaw;					/**< in radians NED -PI..+PI, NAN means don't change yaw		*/
+			float loiter_radius;		/**< loiter radius in meters, 0 for a VTOL to hover, negative for counter-clockwise 盘旋半径*/
+			float yaw;				/**< in radians NED -PI..+PI, NAN means don't change yaw 值为NAN表示偏航角为固定值		*/
 			float ___lat_float;			/**< padding */
 			float ___lon_float;			/**< padding */
 			float altitude;				/**< altitude in meters	(AMSL)			*/

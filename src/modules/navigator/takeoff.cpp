@@ -110,6 +110,7 @@ Takeoff::set_takeoff_position()
 		abs_altitude = rep->current.alt;
 
 		// If the altitude suggestion is lower than home + minimum clearance, raise it and complain.
+		// 如果高度的建议低于home高度+最低起飞高度，则提升高度
 		if (abs_altitude < min_abs_altitude) {
 			abs_altitude = min_abs_altitude;
 			mavlink_log_critical(_navigator->get_mavlink_log_pub(),
@@ -117,6 +118,7 @@ Takeoff::set_takeoff_position()
 		}
 	} else {
 		// Use home + minimum clearance but only notify.
+		// 否则使用home+最低起飞高度，仅用于指示，并不是真的设定高度值
 		abs_altitude = min_abs_altitude;
 		mavlink_log_info(_navigator->get_mavlink_log_pub(),
 				 "Using minimum takeoff altitude: %.2f m", (double)_param_min_alt.get());
@@ -131,16 +133,17 @@ Takeoff::set_takeoff_position()
 	}
 
 	// set current mission item to takeoff
-	set_takeoff_item(&_mission_item, abs_altitude);
+	set_takeoff_item(&_mission_item, abs_altitude); // NAV_CMD_TAKEOFF
 	_navigator->get_mission_result()->reached = false;
 	_navigator->get_mission_result()->finished = false;
 	_navigator->set_mission_result_updated();
 	reset_mission_item_reached();
 
 	// convert mission item to current setpoint
+	// 将任务项转换成当前设定值
 	struct position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
 	pos_sp_triplet->previous.valid = false;
-	mission_item_to_position_setpoint(&_mission_item, &pos_sp_triplet->current);
+	mission_item_to_position_setpoint(&_mission_item, &pos_sp_triplet->current); // SETPOINT_TYPE_TAKEOFF
 	pos_sp_triplet->current.yaw = _navigator->get_home_position()->yaw;
 	pos_sp_triplet->current.yaw_valid = true;
 	pos_sp_triplet->next.valid = false;

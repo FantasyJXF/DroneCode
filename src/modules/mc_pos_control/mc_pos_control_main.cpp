@@ -551,10 +551,10 @@ MulticopterPositionControl::parameters_update(bool force)
 
 		float v;
 		uint32_t v_i;
-		param_get(_params_handles.xy_p, &v);
+		param_get(_params_handles.xy_p, &v); // 水平方向上的位置比例增益0.95
 		_params.pos_p(0) = v;
 		_params.pos_p(1) = v;
-		param_get(_params_handles.z_p, &v);
+		param_get(_params_handles.z_p, &v); // 竖直方向上的位置比例增益1.0
 		_params.pos_p(2) = v;
 		param_get(_params_handles.xy_vel_p, &v);
 		_params.vel_p(0) = v;
@@ -883,6 +883,7 @@ MulticopterPositionControl::control_manual(float dt)
 
 	if (_control_mode.flag_control_altitude_enabled) {
 		/* set vertical velocity setpoint with throttle stick */
+		// 通过油门摇杆设置垂直速度设定值
 		req_vel_sp(2) = -scale_control(_manual.z - 0.5f, 0.5f, _params.alt_ctl_dz, _params.alt_ctl_dy); // D
 	}
 
@@ -928,7 +929,7 @@ MulticopterPositionControl::control_manual(float dt)
 
 				float vel_xy_mag = sqrtf(_vel(0) * _vel(0) + _vel(1) * _vel(1));
 
-				if (_params.hold_max_xy < FLT_EPSILON || vel_xy_mag < _params.hold_max_xy) {
+				if (_params.hold_max_xy < FLT_EPSILON || vel_xy_mag < _params.hold_max_xy) { // 水平速度小于0.8m
 					/* reset position setpoint to have smooth transition from velocity control to position control */
 					_pos_hold_engaged = true;
 					_pos_sp(0) = _pos(0);
@@ -944,6 +945,7 @@ MulticopterPositionControl::control_manual(float dt)
 		}
 
 		/* set requested velocity setpoint */
+		// 设置速度设定值
 		if (!_pos_hold_engaged) {
 			_pos_sp(0) = _pos(0);
 			_pos_sp(1) = _pos(1);
@@ -1126,9 +1128,10 @@ void MulticopterPositionControl::control_auto(float dt)
 	if (_pos_sp_triplet.current.valid) {
 
 		/* project setpoint to local frame */
+		// 将设定值投影到本地坐标系中
 		map_projection_project(&_ref_pos,
 				       _pos_sp_triplet.current.lat, _pos_sp_triplet.current.lon,
-				       &curr_sp.data[0], &curr_sp.data[1]);
+				       &curr_sp.data[0], &curr_sp.data[1]);// 位置设定值距离参考点的水平方向上的位置
 		curr_sp(2) = -(_pos_sp_triplet.current.alt - _ref_alt);
 
 		if (PX4_ISFINITE(curr_sp(0)) &&
@@ -1156,7 +1159,7 @@ void MulticopterPositionControl::control_auto(float dt)
 
 		/* scaled space: 1 == position error resulting max allowed speed */
 
-		math::Vector<3> cruising_speed = _params.vel_cruise;
+		math::Vector<3> cruising_speed = _params.vel_cruise; // 5m/s
 
 		if (PX4_ISFINITE(_pos_sp_triplet.current.cruising_speed) &&
 		    _pos_sp_triplet.current.cruising_speed > 0.1f) {
@@ -1177,7 +1180,7 @@ void MulticopterPositionControl::control_auto(float dt)
 		    previous_setpoint_valid) {
 
 			/* follow "previous - current" line */
-
+			// 沿着上一刻 -> 当前的线飞行
 			if ((curr_sp - prev_sp).length() > MIN_DIST) {
 
 				/* find X - cross point of unit sphere and trajectory */
@@ -1190,6 +1193,7 @@ void MulticopterPositionControl::control_auto(float dt)
 				if (curr_pos_s_len < 1.0f) {
 					/* copter is closer to waypoint than unit radius */
 					/* check next waypoint and use it to avoid slowing down when passing via waypoint */
+					// 检查下一个航点并使用它来避免通过航点传递时放慢速度
 					if (_pos_sp_triplet.next.valid) {
 						math::Vector<3> next_sp;
 						map_projection_project(&_ref_pos,
@@ -1404,6 +1408,7 @@ MulticopterPositionControl::task_main()
 		//Update previous arming state
 		was_armed = _control_mode.flag_armed;
 
+		// 更新参考点
 		update_ref();
 
 		/* Update velocity derivative,
@@ -1496,6 +1501,7 @@ MulticopterPositionControl::task_main()
 			if (!_control_mode.flag_control_manual_enabled && _pos_sp_triplet.current.valid
 			    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_IDLE) {
 				/* idle state, don't run controller and set zero thrust */
+				// idle状态
 				R.identity();
 				matrix::Quatf qd = R;
 				memcpy(&_att_sp.q_d[0], qd.data(), sizeof(_att_sp.q_d));
@@ -1544,7 +1550,10 @@ MulticopterPositionControl::task_main()
 				}
 
 			} else {
+
+			
 				/* run position & altitude controllers, if enabled (otherwise use already computed velocity setpoints) */
+				// 运行位置&高度控制器
 				if (_run_pos_control) {
 					_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0);
 					_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1);
@@ -1590,6 +1599,7 @@ MulticopterPositionControl::task_main()
 					_vel_sp(1) = _pos_sp_triplet.current.vy;
 				}
 
+				// 运行高度控制
 				if (_run_alt_control) {
 					_vel_sp(2) = (_pos_sp(2) - _pos(2)) * _params.pos_p(2);
 				}
@@ -1634,12 +1644,14 @@ MulticopterPositionControl::task_main()
 				}
 
 				/* use constant descend rate when landing, ignore altitude setpoint */
+				// 着落时使用恒定的下降速率，忽略高度设定值
 				if (!_control_mode.flag_control_manual_enabled && _pos_sp_triplet.current.valid
 				    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_LAND) {
-					_vel_sp(2) = _params.land_speed;
+					_vel_sp(2) = _params.land_speed;  // 下降速度  0.5m/s
 				}
 
 				/* special thrust setpoint generation for takeoff from ground */
+				// takeoff阶段的特定推力设定值
 				if (!_control_mode.flag_control_manual_enabled && _pos_sp_triplet.current.valid
 				    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_TAKEOFF
 				    && _control_mode.flag_armed) {
@@ -1683,20 +1695,20 @@ MulticopterPositionControl::task_main()
 				acc_hor(1) = (_vel_sp(1) - _vel_sp_prev(1)) / dt;
 
 				if ((acc_hor.length() > _params.acc_hor_max) & !_reset_pos_sp) {
-					acc_hor.normalize();
+					acc_hor.normalize(); // 归一化
 					acc_hor *= _params.acc_hor_max;
 					math::Vector<2> vel_sp_hor_prev(_vel_sp_prev(0), _vel_sp_prev(1));
-					math::Vector<2> vel_sp_hor = acc_hor * dt + vel_sp_hor_prev;
+					math::Vector<2> vel_sp_hor = acc_hor * dt + vel_sp_hor_prev; // vt = v0 + at
 					_vel_sp(0) = vel_sp_hor(0);
 					_vel_sp(1) = vel_sp_hor(1);
 				}
 
 				// limit vertical acceleration
-
+				// 限制垂直加速度
 				float acc_v = (_vel_sp(2) - _vel_sp_prev(2)) / dt;
 
 				if ((fabsf(acc_v) > 2 * _params.acc_hor_max) & !_reset_alt_sp) {
-					acc_v /= fabsf(acc_v);
+					acc_v /= fabsf(acc_v); // 正负1
 					_vel_sp(2) = acc_v * 2 * _params.acc_hor_max * dt + _vel_sp_prev(2);
 				}
 
@@ -1717,23 +1729,23 @@ MulticopterPositionControl::task_main()
 				if (_control_mode.flag_control_climb_rate_enabled || _control_mode.flag_control_velocity_enabled ||
 				    _control_mode.flag_control_acceleration_enabled) {
 					/* reset integrals if needed */
-					if (_control_mode.flag_control_climb_rate_enabled) {
+					if (_control_mode.flag_control_climb_rate_enabled) { // 控制爬升速率
 						if (reset_int_z) {
 							reset_int_z = false;
-							float i = _params.thr_min;
+							float i = _params.thr_min; // 最小油门0.08
 
 							if (reset_int_z_manual) {
-								i = _params.thr_hover;
+								i = _params.thr_hover; // 悬停油门0.5
 
 								if (i < _params.thr_min) {
 									i = _params.thr_min;
 
-								} else if (i > _params.thr_max) {
+								} else if (i > _params.thr_max) { // 最大油门0.9
 									i = _params.thr_max;
 								}
 							}
 
-							thrust_int(2) = -i;
+							thrust_int(2) = -i; // 推力分量
 						}
 
 					} else {
@@ -1752,10 +1764,13 @@ MulticopterPositionControl::task_main()
 					}
 
 					/* velocity error */
-					math::Vector<3> vel_err = _vel_sp - _vel;
+					// 速度误差
+					math::Vector<3> vel_err = _vel_sp - _vel; 
 
 					// check if we have switched from a non-velocity controlled mode into a velocity controlled mode
 					// if yes, then correct xy velocity setpoint such that the attitude setpoint is continuous
+					// 检查我们是否从非速度控制模式切换到了速度控制模式
+					// 如果是，则矫正xy速度设定值，这样姿态设定值就是持续的了
 					if (!control_vel_enabled_prev && _control_mode.flag_control_velocity_enabled) {
 
 						matrix::Dcmf Rb = matrix::Quatf(_att_sp.q_d[0], _att_sp.q_d[1], _att_sp.q_d[2], _att_sp.q_d[3]);
@@ -1784,7 +1799,7 @@ MulticopterPositionControl::task_main()
 						thrust_sp = math::Vector<3>(_pos_sp_triplet.current.a_x, _pos_sp_triplet.current.a_y, _pos_sp_triplet.current.a_z);
 
 					} else {
-						thrust_sp = vel_err.emult(_params.vel_p) + _vel_err_d.emult(_params.vel_d) + thrust_int;
+						thrust_sp = vel_err.emult(_params.vel_p) + _vel_err_d.emult(_params.vel_d) + thrust_int; // PID控制
 					}
 
 					if (_pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_TAKEOFF
@@ -1816,7 +1831,7 @@ MulticopterPositionControl::task_main()
 					}
 
 					float thrust_abs = thrust_sp.length();
-					float tilt_max = _params.tilt_max_air;
+					float tilt_max = _params.tilt_max_air; // 限制POS、AUTO模式下的最大倾角  45°
 					float thr_max = _params.thr_max;
 					/* filter vel_z over 1/8sec */
 					_vel_z_lp = _vel_z_lp * (1.0f - dt * 8.0f) + dt * 8.0f * _vel(2);
@@ -2086,6 +2101,7 @@ MulticopterPositionControl::task_main()
 		}
 
 		/* generate attitude setpoint from manual controls */
+		// 从手动控制产生姿态设定值
 		if (_control_mode.flag_control_manual_enabled && _control_mode.flag_control_attitude_enabled) {
 
 			/* reset yaw setpoint to current position if needed */

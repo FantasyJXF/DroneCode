@@ -126,14 +126,14 @@ RTL::on_activation()
 
 	}
 
-	set_rtl_item();
+	set_rtl_item(); // 设置当前任务项
 }
 
 void
 RTL::on_active()
 {
 	if (_rtl_state != RTL_STATE_LANDED && is_mission_item_reached()) {
-		advance_rtl();
+		advance_rtl();  // 返航阶段
 		set_rtl_item();
 	}
 }
@@ -318,10 +318,11 @@ RTL::set_rtl_item()
 	/* execute command if set */
 	// 如果设置了的话，则执行命令
 	if (!item_contains_position(&_mission_item)) {
-		issue_command(&_mission_item);
+		issue_command(&_mission_item); // 发布控制指令
 	}
 
 	/* convert mission item to current position setpoint and make it valid */
+	// 将任务项转化为当前的位置设定值并使其有效
 	mission_item_to_position_setpoint(&_mission_item, &pos_sp_triplet->current);
 	pos_sp_triplet->next.valid = false;
 

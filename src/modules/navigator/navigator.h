@@ -271,7 +271,7 @@ private:
 
 	bool		_inside_fence;			/**< vehicle is inside fence */
 
-	bool		_can_loiter_at_sp;			/**< flags if current position SP can be used to loiter */
+	bool		_can_loiter_at_sp;			/**< flags if current position SP can be used to loiter 如果当前位置设定值可以用于悬停，标志位置位 */
 	bool		_pos_sp_triplet_updated;		/**< flags if position SP triplet needs to be published */
 	bool 		_pos_sp_triplet_published_invalid_once;	/**< flags if position SP triplet has been published once to UORB */
 	bool		_mission_result_updated;		/**< flags if mission result has seen an update */

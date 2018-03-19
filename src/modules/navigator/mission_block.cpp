@@ -261,6 +261,7 @@ MissionBlock::is_mission_item_reached()
 
 
 			// NAV_CMD_LOITER_TO_ALT only uses mission item altitude once it's in the loiter
+			// NAV_CMD_LOITER_TO_ALT: 一旦进入loiter模式，仅使用任务项的高度
 			//  first check if the altitude setpoint is the mission setpoint
 			struct position_setpoint_s *curr_sp = &_navigator->get_position_setpoint_triplet()->current;
 
@@ -385,6 +386,7 @@ MissionBlock::is_mission_item_reached()
 	}
 
 	// all acceptance criteria must be met in the same iteration
+	// 所有接受标准必须在同一次迭代中得到满足
 	_waypoint_position_reached = false;
 	_waypoint_yaw_reached = false;
 	return false;
@@ -470,6 +472,7 @@ MissionBlock::issue_command(const struct mission_item_s *item)
 		_action_start = hrt_absolute_time();
 
 		if (_cmd_pub != nullptr) {
+			// 发布飞机命令
 			orb_publish(ORB_ID(vehicle_command), _cmd_pub, &cmd);
 
 		} else {

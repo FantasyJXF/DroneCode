@@ -134,8 +134,9 @@ typedef enum VEHICLE_MODE_FLAG
 static constexpr uint8_t COMMANDER_MAX_GPS_NOISE = 60;		/**< Maximum percentage signal to noise ratio allowed for GPS reception */
 
 /* Decouple update interval and hysteresis counters, all depends on intervals */
-#define COMMANDER_MONITORING_INTERVAL 10000
-#define COMMANDER_MONITORING_LOOPSPERMSEC (1/(COMMANDER_MONITORING_INTERVAL/1000.0f))
+// 解耦更新间隔和滞后计数器，全部取决于间隔
+#define COMMANDER_MONITORING_INTERVAL 10000    // 10ms
+#define COMMANDER_MONITORING_LOOPSPERMSEC (1/(COMMANDER_MONITORING_INTERVAL/1000.0f))   // 0.1
 
 #define MAVLINK_OPEN_INTERVAL 50000
 
@@ -1658,6 +1659,7 @@ int commander_thread_main(int argc, char *argv[])
 		set_tune_override(TONE_STARTUP_TUNE); //normal boot tune
 	} else {
 			// sensor diagnostics done continuously, not just at boot so don't warn about any issues just yet
+			// 传感器的诊断持续进行，不仅仅是在启动的时候
 			status_flags.condition_system_sensors_initialized = Commander::preflightCheck(&mavlink_log_pub, true, true, true, true,
 				checkAirspeed, (status.rc_input_mode == vehicle_status_s::RC_IN_MODE_DEFAULT), !status_flags.circuit_breaker_engaged_gpsfailure_check,
 				/* checkDynamic */ false, is_vtol(&status), /* reportFailures */ false, /* prearm */ false, hrt_elapsed_time(&commander_boot_timestamp));
@@ -1935,9 +1937,12 @@ int commander_thread_main(int argc, char *argv[])
 			orb_copy(ORB_ID(sensor_combined), sensor_sub, &sensors);
 
 			/* Check if the barometer is healthy and issue a warning in the GCS if not so.
+ 			 * 检查气压计是否健康，如果不健康的话在地面站上发布一个警告。
 			 * Because the barometer is used for calculating AMSL altitude which is used to ensure
 			 * vertical separation from other airtraffic the operator has to know when the
 			 * barometer is inoperational.
+			 * 因为气压计用于计算AMSL高度，该高度用于确保与其他air traffic在垂直方向上的分离。
+			 * 飞手必须知道气压计何时处于工作状态
 			 * */
 			hrt_abstime baro_timestamp = sensors.timestamp + sensors.baro_timestamp_relative;
 			if (hrt_elapsed_time(&baro_timestamp) < FAILSAFE_DEFAULT_TIMEOUT) {
@@ -2308,6 +2313,7 @@ int commander_thread_main(int argc, char *argv[])
 		}
 
 		/* update position setpoint triplet */
+		// 更新位置设定值triplet
 		orb_check(pos_sp_triplet_sub, &updated);
 
 		if (updated) {
@@ -2572,7 +2578,7 @@ int commander_thread_main(int argc, char *argv[])
 			    	internal_state.main_state == commander_state_s::MAIN_STATE_STAB ||
 			    	internal_state.main_state == commander_state_s::MAIN_STATE_RATTITUDE ||
 			    	land_detector.landed) &&
-			    sp_man.r < -STICK_ON_OFF_LIMIT && sp_man.z < 0.1f) {
+			    sp_man.r < -STICK_ON_OFF_LIMIT && sp_man.z < 0.1f) { /* 通过遥控器解锁飞机 */
 
 				if (stick_off_counter > rc_arm_hyst) {
 					/* disarm to STANDBY if ARMED or to STANDBY_ERROR if ARMED_ERROR */
@@ -2605,6 +2611,7 @@ int commander_thread_main(int argc, char *argv[])
 			}
 
 			/* check if left stick is in lower right position and we're in MANUAL mode -> arm */
+			/* 遥控器控制飞机上锁 */
 			if (sp_man.r > STICK_ON_OFF_LIMIT && sp_man.z < 0.1f && status.rc_input_mode != vehicle_status_s::RC_IN_MODE_OFF ) {
 				if (stick_on_counter > rc_arm_hyst) {
 
@@ -2677,8 +2684,9 @@ int commander_thread_main(int argc, char *argv[])
 			}
 
 			/* evaluate the main state machine according to mode switches */
+			// 遥控器模式切换
 			bool first_rc_eval = (_last_sp_man.timestamp == 0) && (sp_man.timestamp > 0);
-			transition_result_t main_res = set_main_state_rc(&status);
+			transition_result_t main_res = set_main_state_rc(&status); // 遥控器设置飞机主模式
 
 			/* play tune on mode change only if armed, blink LED always */
 			if (main_res == TRANSITION_CHANGED || first_rc_eval) {
@@ -2816,6 +2824,7 @@ int commander_thread_main(int argc, char *argv[])
 
 		/* reset main state after takeoff has completed */
 		/* only switch back to posctl */
+		// 完成起飞后重置main state
 		if (main_state_prev == commander_state_s::MAIN_STATE_POSCTL) {
 
 			if (internal_state.main_state == commander_state_s::MAIN_STATE_AUTO_TAKEOFF
@@ -2897,6 +2906,7 @@ int commander_thread_main(int argc, char *argv[])
 		const hrt_abstime now = hrt_absolute_time();
 
 		/* First time home position update - but only if disarmed */
+		// home位置的第一次更新，未解锁
 		if (!status_flags.condition_home_position_valid && !armed.armed) {
 			commander_set_home_position(home_pub, _home, local_position, global_position, attitude);
 		}
@@ -2916,6 +2926,7 @@ int commander_thread_main(int argc, char *argv[])
 		}
 
 		/* now set navigation state according to failsafe and main state */
+		// 根据failsafe和main state设置navigation state
 		bool nav_state_changed = set_nav_state(&status,
 						       &internal_state,
 						       &mavlink_log_pub,
@@ -2948,6 +2959,7 @@ int commander_thread_main(int argc, char *argv[])
 		}
 
 		/* publish states (armed, control mode, vehicle status) at least with 5 Hz */
+		// 至少以5Hz的频率发布状态(解锁、控制模式、飞机状态)
 		if (counter % (200000 / COMMANDER_MONITORING_INTERVAL) == 0 || status_changed) {
 			set_control_mode();
 			control_mode.timestamp = now;
