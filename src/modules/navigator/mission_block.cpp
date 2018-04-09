@@ -87,6 +87,14 @@ MissionBlock::~MissionBlock()
 {
 }
 
+/**
+ *
+ * 任务完成的三个指标:
+ * 1: 距离在航点可接受范围内  dist_xy   dist_z  dist
+ * 2: 航向在规定时间内达到误差可接受范围内
+ * 3: 悬停时间达到
+ *
+ */
 bool
 MissionBlock::is_mission_item_reached()
 {
@@ -163,13 +171,13 @@ MissionBlock::is_mission_item_reached()
 		// 海平面高度
 		float altitude_amsl = _mission_item.altitude_is_relative
 					? _mission_item.altitude + _navigator->get_home_position()->alt
-					: _mission_item.altitude;
+					: _mission_item.altitude; // mission_item结构体中的altitude默认为海拔高度
 
 		dist = get_distance_to_point_global_wgs84(_mission_item.lat, _mission_item.lon, altitude_amsl,
 					_navigator->get_global_position()->lat,
 					_navigator->get_global_position()->lon,
 					_navigator->get_global_position()->alt,
-					&dist_xy, &dist_z);
+					&dist_xy, &dist_z); // 同时还更新了水平、垂直方向上的距离
 
 		/* FW special case for NAV_CMD_WAYPOINT to achieve altitude via loiter */
 		if (!_navigator->get_vstatus()->is_rotary_wing &&
@@ -177,6 +185,7 @@ MissionBlock::is_mission_item_reached()
 
 			struct position_setpoint_s *curr_sp = &_navigator->get_position_setpoint_triplet()->current;
 			/* close to waypoint, but altitude error greater than twice acceptance */
+			// 接近航点了，但是高度误差大于两倍的可接受距离
 			if ((dist >= 0.0f)
 				&& (dist_z > 2 * _navigator->get_altitude_acceptance_radius())
 				&& (dist_xy < 2 * _navigator->get_loiter_radius())) {
@@ -192,6 +201,7 @@ MissionBlock::is_mission_item_reached()
 				/* restore SETPOINT_TYPE_POSITION */
 				if (curr_sp->type == position_setpoint_s::SETPOINT_TYPE_LOITER) {
 					/* loiter acceptance criteria required to revert back to SETPOINT_TYPE_POSITION */
+					// loiter的可接受标准需要恢复到SETPOINT_TYPE_POSITION
 					if ((dist >= 0.0f)
 						&& (dist_z < _navigator->get_loiter_radius())
 						&& (dist_xy <= _navigator->get_loiter_radius() * 1.2f)) {
@@ -267,6 +277,7 @@ MissionBlock::is_mission_item_reached()
 
 			if (fabsf(curr_sp->alt - altitude_amsl) >= FLT_EPSILON) {
 				// check if the initial loiter has been accepted
+				// 检查初始loiter已经接受了
 				dist = -1.0f;
 				dist_xy = -1.0f;
 				dist_z = -1.0f;
@@ -292,6 +303,7 @@ MissionBlock::is_mission_item_reached()
 					_waypoint_position_reached = true;
 
 					// set required yaw from bearing to the next mission item
+					// 根据到下一个任务项的偏角设置必要的偏航
 					if (_mission_item.force_heading) {
 						struct position_setpoint_s next_sp = _navigator->get_position_setpoint_triplet()->next;
 
@@ -309,6 +321,7 @@ MissionBlock::is_mission_item_reached()
 			}
 		} else {
 			/* for normal mission items used their acceptance radius */
+			// 对于一般任务项  使用可接受半径
 			float mission_acceptance_radius = _navigator->get_acceptance_radius(_mission_item.acceptance_radius);
 
 			/* if set to zero use the default instead */
@@ -329,7 +342,7 @@ MissionBlock::is_mission_item_reached()
 	}
 
 	/* Check if the waypoint and the requested yaw setpoint. */
-
+	// 检查航点和需要的偏航设定值
 	if (_waypoint_position_reached && !_waypoint_yaw_reached) {
 
 		if ((_navigator->get_vstatus()->is_rotary_wing
@@ -340,6 +353,7 @@ MissionBlock::is_mission_item_reached()
 			float yaw_err = _wrap_pi(_mission_item.yaw - _navigator->get_global_position()->yaw);
 
 			/* accept yaw if reached or if timeout is set in which case we ignore not forced headings */
+			// 如果到达的话接受偏航  如果设置了超时时间  这样的话忽略不强制指向
 			if (fabsf(yaw_err) < math::radians(_param_yaw_err.get())
 				|| (_param_yaw_timeout.get() >= FLT_EPSILON && !_mission_item.force_heading)) {
 
@@ -347,6 +361,7 @@ MissionBlock::is_mission_item_reached()
 			}
 
 			/* if heading needs to be reached, the timeout is enabled and we don't make it, abort mission */
+			// 如果航向需要到达，超时也使能了但是未能满足，那么终止任务
 			if (!_waypoint_yaw_reached && _mission_item.force_heading &&
 				(_param_yaw_timeout.get() >= FLT_EPSILON) &&
 				(now - _time_wp_reached >= (hrt_abstime)_param_yaw_timeout.get() * 1e6f)) {
@@ -360,6 +375,7 @@ MissionBlock::is_mission_item_reached()
 	}
 
 	/* Once the waypoint and yaw setpoint have been reached we can start the loiter time countdown */
+	// 一旦航点和偏航设定值满足了，就可以开始悬停时间倒数了
 	if (_waypoint_position_reached && _waypoint_yaw_reached) {
 
 		if (_time_first_inside_orbit == 0) {
@@ -371,11 +387,13 @@ MissionBlock::is_mission_item_reached()
 			(now - _time_first_inside_orbit >= (hrt_abstime)(Navigator::get_time_inside(_mission_item) * 1e6f))) {
 
 			// exit xtrack location
+			// 退出位置
 			if (_mission_item.loiter_exit_xtrack &&
 				(_mission_item.nav_cmd == NAV_CMD_LOITER_TIME_LIMIT ||
 				 _mission_item.nav_cmd == NAV_CMD_LOITER_TO_ALT)) {
 
 				// reset lat/lon of loiter waypoint so vehicle exits on a tangent
+				// 复位loiter航点的经纬度  这样飞机以正切退出
 				struct position_setpoint_s *curr_sp = &_navigator->get_position_setpoint_triplet()->current;
 				curr_sp->lat = _navigator->get_global_position()->lat;
 				curr_sp->lon = _navigator->get_global_position()->lon;
@@ -453,7 +471,9 @@ MissionBlock::issue_command(const struct mission_item_s *item)
 		// XXX: we should issue a vehicle command and handle this somewhere else
 		memset(&actuators, 0, sizeof(actuators));
 		// params[0] actuator number to be set 0..5 (corresponds to AUX outputs 1..6)
-		// params[1] new value for selected actuator in ms 900...2000
+		// params[0]执行器数设置为0-5，对应辅助通道的1-6
+		// param[1] new value for selected actuator in ms 900...2000
+		// param[1] 为选中执行器的新值
 		actuators.control[(int)item->params[0]] = 1.0f / 2000 * -item->params[1];
 		actuators.timestamp = hrt_absolute_time();
 

@@ -77,6 +77,7 @@ bool MissionFeasibilityChecker::checkMissionFeasible(orb_advert_t *mavlink_log_p
 	_mavlink_log_pub = mavlink_log_pub;
 
 	// first check if we have a valid position
+	// 首先检查位置是否有效
 	if (!home_valid /* can later use global / local pos for finer granularity */) {
 		failed = true;
 		warned = true;

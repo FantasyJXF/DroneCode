@@ -73,6 +73,7 @@ PARAM_DEFINE_FLOAT(MIS_LTRMIN_ALT, 1.2f);
 
 /**
  * Persistent onboard mission storage
+ * 永久板载任务存储
  *
  * When enabled, missions that have been uploaded by the GCS are stored
  * and reloaded after reboot persistently.
@@ -84,6 +85,7 @@ PARAM_DEFINE_INT32(MIS_ONBOARD_EN, 1);
 
 /**
  * Maximal horizontal distance from home to first waypoint
+ * 从home点到第一个航点的最长距离
  *
  * Failsafe check to prevent running mission stored from previous flight at a new takeoff location.
  * Set a value of zero or less to disable. The mission will not be started if the current
@@ -100,9 +102,10 @@ PARAM_DEFINE_FLOAT(MIS_DIST_1WP, 900);
 
 /**
  * Altitude setpoint mode
+ * 高度设定值模式
  *
- * 0: the system will follow a zero order hold altitude setpoint
- * 1: the system will follow a first order hold altitude setpoint
+ * 0: the system will follow a zero order hold altitude setpoint  零阶
+ * 1: the system will follow a first order hold altitude setpoint 一阶
  * values follow the definition in enum mission_altitude_mode
  *
  * @min 0
@@ -130,6 +133,7 @@ PARAM_DEFINE_INT32(MIS_YAWMODE, 1);
 
 /**
  * Time in seconds we wait on reaching target heading at a waypoint if it is forced.
+ * 等待时间
  *
  * If set > 0 it will ignore the target heading for normal waypoint acceptance. If the
  * waypoint forces the heading the timeout will matter. For example on VTOL forwards transiton.

@@ -260,13 +260,13 @@ private:
 					    only use if current and previous are valid */
 
 	enum work_item_type {
-		WORK_ITEM_TYPE_DEFAULT,		/**< default mission item */
-		WORK_ITEM_TYPE_TAKEOFF,		/**< takeoff before moving to waypoint */
-		WORK_ITEM_TYPE_MOVE_TO_LAND,	/**< move to land waypoint before descent */
-		WORK_ITEM_TYPE_ALIGN,		/**< align for next waypoint */
+		WORK_ITEM_TYPE_DEFAULT,		/**< default mission item 默认任务类型 */
+		WORK_ITEM_TYPE_TAKEOFF,		/**< takeoff before moving to waypoint 在飞向航点前起飞 */
+		WORK_ITEM_TYPE_MOVE_TO_LAND,	/**< move to land waypoint before descent 下降前飞到着陆航点 */
+		WORK_ITEM_TYPE_ALIGN,		/**< align for next waypoint 对齐下一个航点 */
 		WORK_ITEM_TYPE_CMD_BEFORE_MOVE,	/**<  */
-		WORK_ITEM_TYPE_TRANSITON_AFTER_TAKEOFF,	/**<  */
-		WORK_ITEM_TYPE_TRANSITON_BEFORE_LAND,	/**<  */
+		WORK_ITEM_TYPE_TRANSITON_AFTER_TAKEOFF,	/**< 起飞后变身 */
+		WORK_ITEM_TYPE_TRANSITON_BEFORE_LAND,	/**<  着陆前变身 */
 		WORK_ITEM_TYPE_MOVE_TO_LAND_AFTER_TRANSITION	/**<  */
 	} _work_item_type;	/**< current type of work to do (sub mission item) */
 
