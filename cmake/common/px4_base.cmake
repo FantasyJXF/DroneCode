@@ -116,6 +116,7 @@ endfunction()
 #	px4_add_git_submodule
 #
 #	This function add a git submodule target.
+#   这个函数添加了一个git子模块目标
 #
 #	Usage:
 #		px4_add_git_submodule(TARGET <target> PATH <path>)
@@ -927,6 +928,7 @@ endfunction()
 #	px4_generate_parameters_xml
 #
 #	Generates a parameters.xml file.
+#   生成一个parameters.xml文件
 #
 #	Usage:
 #		px4_generate_parameters_xml(OUT <param-xml_file>)

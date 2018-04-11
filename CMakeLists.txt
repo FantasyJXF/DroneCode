@@ -33,25 +33,33 @@
 
 #=============================================================================
 # CMAKE CODING STANDARD FOR PX4
+# PX4的CMAKE代码规则
 #
 # Structure
+# 结构
 # ---------------------------------------------------------------------------
 #
 # * Common functions should be included in px_base.cmake.
+# * 通用函数应该包含在px_base.cmake文件中
 #
 # * OS/ board specific fucntions should be include in
 #	px_impl_${OS}.cmake or px4_impl_${OS}_${BOARD}.cmake.
+# * 操作系统/飞控板特定的函数应该包含在px_impl_$(OS).cmake或px_impl_$(OS)_$(BOARD).cmake文件中
 #
 # Formatting
+# 格式
 # ---------------------------------------------------------------------------
 #
 # * Use hard indents to match the px4 source code.
 #
 # * All function and script arguments are upper case.
+# * 所有的函数和脚本参数都是大写的
 #
 # * All local variables are lower case.
+# * 所有的局部变量都是小写
 #
 # * All cmake functions are lowercase.
+# * 所有的cmake函数都是小写的
 #
 # * For else, endif, endfunction, etc, never put the name of the statement
 #
@@ -74,10 +82,13 @@
 #		endif () <-- leave blank
 #
 # Functions/Macros
+# 函数/宏
 # ---------------------------------------------------------------------------
 #
 # * Use px4_parse_function_args to parse functions and check for required
 #   arguments. Unless there is only one argument in the function and it is clear.
+# * 使用px4_parse_function_args来解析函数并检查所需的参数。
+#   除非函数只有一个参数并且非常清楚明了
 #
 # * Never use macros. They allow overwriting global variables and this
 #	makes variable declarations hard to locate.
@@ -90,23 +101,29 @@
 #	resuse functions.
 #
 # Included CMake Files
+# 包含的CMake文件
 # ---------------------------------------------------------------------------
 #
 # * All variables in config files must have the prefix "config_".
+# * config文件中的所有变量必须以"config_"为前缀
 #
 # * Never set global variables in an included cmake file,
+#   不要在子cmake文件中设置全局变量
 #	you may only define functions. This excludes config and Toolchain files.
 #	This makes it clear to the user when variables are being set or targets
 #	are being created.
 #
 # * Setting a global variable in a CMakeLists.txt file is ok, because
+# * 可以在CMakeLists.txt中设置全局变量
 #	each CMakeLists.txt file has scope in the current directory and all
 #	subdirecties, so it is not truly global.
 #
 # * All toolchain files should be included in the cmake
 #	directory and named Toolchain-"name".cmake.
+# * 所有的工具链文件都应该包含在cmake目录下，并以Toolchain-"name".cmake命名
 #
 # Misc
+# 各种各样的   Miscellaneous
 # ---------------------------------------------------------------------------
 #
 # * If referencing a string variable, don't put it in quotes.
@@ -179,6 +196,7 @@ include(${config_module})
 include(ExternalProject)
 
 # require px4 module interface
+# 必要的px4模块接口
 set(px4_required_interface
 	px4_os_prebuild_targets
 	px4_os_add_flags
