@@ -522,8 +522,7 @@ function(px4_os_prebuild_targets)
 			ARGN ${ARGN})
 	px4_nuttx_add_export(OUT nuttx_export_${BOARD}
 		CONFIG ${BOARD}
-		THREADS ${THREADS}
-		DEPENDS git_nuttx)
+		THREADS ${THREADS})
 	add_custom_target(${OUT} DEPENDS nuttx_export_${BOARD})
 endfunction()
 

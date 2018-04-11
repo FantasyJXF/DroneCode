@@ -266,22 +266,6 @@ foreach(var ${required_variables})
 endforeach()
 
 #=============================================================================
-# git
-#
-px4_add_git_submodule(TARGET git_genmsg PATH "Tools/genmsg")
-px4_add_git_submodule(TARGET git_gencpp PATH "Tools/gencpp")
-px4_add_git_submodule(TARGET git_mavlink PATH "mavlink/include/mavlink/v1.0")
-px4_add_git_submodule(TARGET git_gtest PATH "unittests/gtest")
-px4_add_git_submodule(TARGET git_uavcan PATH "src/modules/uavcan/libuavcan")
-px4_add_git_submodule(TARGET git_nuttx PATH "NuttX")
-px4_add_git_submodule(TARGET git_driverframework PATH "src/lib/DriverFramework")
-px4_add_git_submodule(TARGET git_ecl PATH "src/lib/ecl")
-px4_add_git_submodule(TARGET git_jmavsim PATH "Tools/jMAVSim")
-px4_add_git_submodule(TARGET git_gazebo PATH "Tools/sitl_gazebo")
-px4_add_git_submodule(TARGET git_matrix PATH "src/lib/matrix")
-px4_add_git_submodule(TARGET git_cmake_hexagon PATH "cmake/cmake_hexagon")
-
-#=============================================================================
 # misc targets
 #
 add_custom_target(check_format
@@ -330,7 +314,8 @@ add_subdirectory(msg)
 px4_generate_messages(TARGET msg_gen
 	MSG_FILES ${msg_files}
 	OS ${OS}
-	DEPENDS git_genmsg git_gencpp prebuild_targets
+#	DEPENDS git_genmsg git_gencpp prebuild_targets
+	DEPENDS prebuild_targets
 	)
 px4_generate_parameters_xml(OUT parameters.xml BOARD ${BOARD})
 px4_generate_airframes_xml(OUT airframes.xml BOARD ${BOARD})
