@@ -18,25 +18,25 @@ set(config_module_list
 	drivers/boards/px4fmu-v2
 	drivers/rgbled
 	drivers/mpu6000
-	drivers/mpu9250
+	#drivers/mpu9250
 	drivers/lsm303d
 	drivers/l3gd20
 	drivers/hmc5883
 	drivers/ms5611
 	#drivers/mb12xx
 	#drivers/srf02
-	drivers/sf0x
+	#drivers/sf0x
 	#drivers/ll40ls
-	drivers/trone
+	#drivers/trone
 	drivers/gps
 	drivers/pwm_out_sim
 	#drivers/hott
 	#drivers/hott/hott_telemetry
 	#drivers/hott/hott_sensors
 	#drivers/blinkm
-	drivers/airspeed
-	drivers/ets_airspeed
-	drivers/meas_airspeed
+	#drivers/airspeed
+	#drivers/ets_airspeed
+	#drivers/meas_airspeed
 	#drivers/frsky_telemetry
 	modules/sensors
 	#drivers/mkblctrl
@@ -44,7 +44,7 @@ set(config_module_list
 	#drivers/oreoled
 	#drivers/vmount
 	drivers/pwm_input
-	drivers/camera_trigger
+	#drivers/camera_trigger
 	drivers/bst
 	#drivers/snapdragon_rc_pwm
 	drivers/lis3mdl
@@ -96,19 +96,19 @@ set(config_module_list
 	#
 	# Estimation modules
 	#
-	#modules/attitude_estimator_q
-	#modules/position_estimator_inav
+	modules/attitude_estimator_q
+	modules/position_estimator_inav
 	#modules/local_position_estimator
-	modules/ekf2
+	#modules/ekf2
 
 	#
 	# Vehicle Control
 	#
-	modules/fw_pos_control_l1
-	modules/fw_att_control
+	#modules/fw_pos_control_l1
+	#modules/fw_att_control
 	modules/mc_att_control
 	modules/mc_pos_control
-	modules/vtol_att_control
+	#modules/vtol_att_control
 
 	#
 	# Logging

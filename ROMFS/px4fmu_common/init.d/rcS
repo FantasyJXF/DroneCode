@@ -346,6 +346,7 @@ then
 	else
 		unset HIL
 		gps start
+		uavcan start
 	fi
 
 	# waypoint storage
